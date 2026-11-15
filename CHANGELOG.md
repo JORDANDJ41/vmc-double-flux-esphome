@@ -2,10 +2,10 @@
 
 ## v1.2.0 (15/11/2026) : étalonnage des débits
 
-- Nouvelle section **« Étalonnage des débits »** : débits mesurés à 100 % (et en option à 50 %) au soufflage, et à 100 % à l'extraction.
+- Nouvelle section **« Étalonnage des débits »** : **4 points (25/50/75/100 %)** pour le soufflage et pour l'extraction. Seuls les points saisis sont utilisés, avec une interpolation linéaire entre eux.
 - Nouveaux capteurs **Débit soufflage** et **Débit extraction** (m³/h), calculés en continu selon la vitesse (et l'antigel).
 - La **puissance et l'énergie récupérées** utilisent le débit de soufflage étalonné.
-- Page web : débits affichés sous les ventilateurs.
+- Page web et carte Home Assistant : débits affichés sous les ventilateurs.
 
 ## v1.1.0 (15/11/2026) : régulation automatique et antigel
 

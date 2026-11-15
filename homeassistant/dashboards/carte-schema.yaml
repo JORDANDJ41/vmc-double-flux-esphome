@@ -26,6 +26,13 @@ elements:
     entity: number.vmc_vitesse_extraction
     style: {left: 30.3%, top: 77.7%, color: "white", font-weight: 700, font-size: "clamp(11px, 1.8vw, 15px)"}
 
+  - type: state-label
+    entity: sensor.vmc_debit_soufflage
+    style: {left: 69.7%, top: 52%, color: "#c9d1e0", font-size: "clamp(10px, 1.6vw, 13px)"}
+  - type: state-label
+    entity: sensor.vmc_debit_extraction
+    style: {left: 30.3%, top: 82%, color: "#c9d1e0", font-size: "clamp(10px, 1.6vw, 13px)"}
+
   # ---------- Bandeau bas ----------
   - type: state-label
     entity: sensor.vmc_puissance_recuperee
