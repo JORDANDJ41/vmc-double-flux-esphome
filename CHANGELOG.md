@@ -1,8 +1,11 @@
 # Historique des versions
 
-## v1.3.1 (15/11/2026) : économie calculée sur l'énergie
+## Prochaine version (non publiée)
 
 - Prix du kWh par défaut : **0,21 €** (tarif Base 2026, abonnement compris), au lieu de 0,17 €.
+
+## v1.3.1 (15/11/2026) : économie calculée sur l'énergie
+
 - « Économie estimée » est maintenant calculée directement à partir de l'**énergie récupérée** : énergie ÷ COP × prix du kWh. Elle tient compte de toute l'énergie déjà récupérée, se recalcule si le prix ou le COP change, et suit la remise à zéro de l'énergie.
 
 ## v1.3.0 (15/11/2026) : économie en euros
