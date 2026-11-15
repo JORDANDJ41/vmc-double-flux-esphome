@@ -1,6 +1,6 @@
 # Historique des versions
 
-## Prochaine version (non publiée)
+## v1.4.0 (15/11/2026) : remises à zéro datées et économie par jour
 
 - **Remises à zéro datées** : l'ESP prend l'heure de Home Assistant (ou d'Internet en SNTP s'il tourne seul) et enregistre la date de la dernière remise à zéro de l'énergie (« Énergie récupérée – comptée depuis le ») et du dernier changement de filtres (« Filtres – changés le »).
 - Nouveau capteur **« Économie moyenne par jour »** (€/j) : économie ÷ nombre de jours depuis la remise à zéro datée de l'énergie.
