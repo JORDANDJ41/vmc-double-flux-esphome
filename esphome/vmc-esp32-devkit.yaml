@@ -479,6 +479,8 @@ number:
 
   - platform: template
     id: cop_chauffage
+    # 1 = radiateurs électriques ; 3-4 = clim / PAC air-air ; 3 = PAC air-eau ;
+    # poêle à granulés : 0,9 et mettre le prix du kWh granulés dans "Prix du kWh électrique"
     name: "COP du chauffage remplacé"
     web_server:
       sorting_group_id: grp_reglages
@@ -1153,6 +1155,19 @@ binary_sensor:
     icon: mdi:air-filter
     lambda: |-
       return (id(filtre_heures) / 24.0f) >= id(filtre_seuil).state;
+
+text_sensor:
+  # Aide affichée sous les réglages d'économie (page web de l'ESP et Home Assistant)
+  - platform: template
+    name: "COP – aide au réglage"
+    web_server:
+      sorting_group_id: grp_reglages
+      sorting_weight: 6
+    icon: mdi:help-circle-outline
+    entity_category: config
+    update_interval: 60s
+    lambda: |-
+      return {"Radiateurs électriques : 1 | Clim ou PAC air/air : 3 à 4 | PAC air/eau : 3 | Poêle à granulés : 0,9 avec le prix du kWh granulés (≈ 0,08 €)"};
 
 button:
   - platform: template

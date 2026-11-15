@@ -186,6 +186,17 @@ En mode Automatique, le by-pass s'ouvre si **les trois conditions** sont réunie
 | Débit extraction | courbe d'étalonnage, sinon soufflage × rapport des débits |
 | Puissance récupérée | 0,34 × débit soufflage × (T insufflation − T air neuf) |
 
+### Régler l'économie estimée
+
+| Chauffage remplacé | « COP du chauffage remplacé » | « Prix du kWh électrique » |
+|---|---|---|
+| Radiateurs électriques | 1 | prix de l'électricité |
+| Clim ou PAC air/air | 3 à 4 | prix de l'électricité |
+| PAC air/eau | environ 3 | prix de l'électricité |
+| Poêle à granulés | 0,9 (rendement du poêle) | prix du kWh de granulés (environ 0,08 €) |
+
+Avec plusieurs chauffages, prendre une valeur intermédiaire selon celui qui chauffe le plus. Le prix est fixe : avec un tarif comme Tempo, mettre une moyenne d'hiver (environ 0,17 €/kWh en 2026).
+
 ### 7.7 Filtres
 
 | Réglage | Rôle |
