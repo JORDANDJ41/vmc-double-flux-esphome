@@ -1,5 +1,11 @@
 # Historique des versions
 
+## v1.3.0 (15/11/2026) : économie en euros
+
+- Deux nouveaux réglages : **« Prix du kWh électrique »** (0,17 €/kWh par défaut) et **« COP du chauffage remplacé »** (1 pour des radiateurs électriques, 3 à 4 pour une clim ou une PAC).
+- Nouveau compteur **« Économie estimée »** (€) : chaleur récupérée ÷ COP × prix du kWh, cumulé dans le temps. Il est remis à zéro avec le bouton de l'énergie récupérée.
+- Synoptique de l'ESP : l'économie s'affiche à côté de l'énergie récupérée. Carte Home Assistant : l'économie s'affiche en haut du schéma.
+
 ## v1.2.1 (15/11/2026) : corrections
 
 - Sans étalonnage, le **« Débit estimé »** correspond maintenant au débit de soufflage **à 100 %** et suit la vitesse réellement envoyée (mode nuit et antigel compris). Avant, il restait fixe, ce qui surestimait la puissance et l'énergie récupérées à vitesse réduite.

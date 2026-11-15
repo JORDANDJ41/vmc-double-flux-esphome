@@ -626,6 +626,37 @@ number:
     entity_category: config
 
   - platform: template
+    id: prix_kwh
+    name: "Prix du kWh électrique"
+    web_server:
+      sorting_group_id: grp_reglages
+      sorting_weight: 4
+    unit_of_measurement: "€/kWh"
+    mode: box
+    min_value: 0.05
+    max_value: 1.0
+    step: 0.001
+    initial_value: 0.17
+    restore_value: true
+    optimistic: true
+    entity_category: config
+
+  - platform: template
+    id: cop_chauffage
+    name: "COP du chauffage remplacé"
+    web_server:
+      sorting_group_id: grp_reglages
+      sorting_weight: 5
+    mode: box
+    min_value: 1
+    max_value: 6
+    step: 0.1
+    initial_value: 3.5
+    restore_value: true
+    optimistic: true
+    entity_category: config
+
+  - platform: template
     id: filtre_seuil
     name: "Filtres – seuil de changement"
     web_server:
@@ -1201,6 +1232,34 @@ sensor:
     state_class: total_increasing
     restore: true
 
+  # Économie : chaleur récupérée = chauffage évité. Électricité évitée = chaleur / COP du
+  # chauffage remplacé (1 = radiateurs, 3-4 = clim/PAC), multipliée par le prix du kWh.
+  - platform: template
+    id: eco_taux
+    internal: true
+    unit_of_measurement: "€/h"
+    accuracy_decimals: 4
+    update_interval: 15s
+    lambda: |-
+      float p = id(p_recup).state, cop = id(cop_chauffage).state, prix = id(prix_kwh).state;
+      if (isnan(p) || p <= 0 || isnan(cop) || cop < 1 || isnan(prix)) return 0.0f;
+      return p / 1000.0f / cop * prix;
+
+  - platform: integration
+    id: eco_euros
+    sensor: eco_taux
+    name: "Économie estimée"
+    web_server:
+      sorting_group_id: grp_perf
+      sorting_weight: 8.5
+    icon: mdi:piggy-bank-outline
+    time_unit: h
+    unit_of_measurement: "€"
+    accuracy_decimals: 2
+    device_class: monetary
+    state_class: total
+    restore: true
+
 binary_sensor:
   - platform: template
     name: "Antigel actif"
@@ -1263,6 +1322,7 @@ button:
     entity_category: config
     on_press:
       - sensor.integration.reset: e_recup
+      - sensor.integration.reset: eco_euros
 
   - platform: template
     name: "Filtres changés (remise à zéro)"

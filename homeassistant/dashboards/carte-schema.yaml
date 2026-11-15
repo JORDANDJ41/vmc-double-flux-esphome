@@ -38,6 +38,10 @@ elements:
     entity: sensor.vmc_puissance_recuperee
     style: {left: 14.5%, top: 95%, color: "white", font-weight: 700, font-size: "clamp(12px, 2.1vw, 17px)"}
   - type: state-label
+    entity: sensor.vmc_economie_estimee
+    prefix: "Économie estimée : "
+    style: {left: 50%, top: 8%, color: "#7ee08a", font-weight: 700, font-size: "clamp(11px, 1.9vw, 15px)"}
+  - type: state-label
     entity: sensor.vmc_energie_recuperee
     style: {left: 39.5%, top: 95%, color: "white", font-weight: 700, font-size: "clamp(12px, 2.1vw, 17px)"}
   - type: state-label

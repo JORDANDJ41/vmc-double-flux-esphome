@@ -31,6 +31,7 @@
     ag: "Antigel \u2013 baisse du soufflage",
     qs: "D\u00e9bit soufflage",
     qe: "D\u00e9bit extraction",
+    eco: "\u00c9conomie estim\u00e9e",
   };
 
   const slug = (s) =>
@@ -210,7 +211,8 @@
     set("v-ve", (num("ve") === null ? "-- %" : Math.round(num("ve")) + " %") + (num("qe") === null ? "" : " \u00b7 " + Math.round(num("qe")) + " m\u00b3/h"));
     set("v-eta", num("eta") === null ? "-- %" : Math.round(num("eta")) + " %");
     set("v-pw", num("pw") === null ? "-- W" : Math.round(num("pw")) + " W");
-    set("v-en", num("en") === null ? "-- kWh" : (num("en") / 1000).toFixed(2) + " kWh");
+    set("v-en", (num("en") === null ? "-- kWh" : (num("en") / 1000).toFixed(2) + " kWh") +
+      (num("eco") === null ? "" : " \u00b7 " + num("eco").toFixed(2).replace(".", ",") + " \u20ac"));
     set("v-pres", num("pres") === null ? "-- Pa" : Math.round(num("pres")) + " Pa");
     const r = num("ratio");
     const dT = (num("trep") !== null && num("text") !== null) ? num("trep") - num("text") : null;
