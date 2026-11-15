@@ -44,3 +44,18 @@ Sac de volume connu plaqué sur la bouche : débit (m³/h) = volume (L) ÷ temps
 | 75 | | | | | |
 | 50 | | | | | |
 | 25 | | | | | |
+
+## Saisie de l'étalonnage dans l'ESP
+
+Section **« Étalonnage des débits »** (page web → Configurer, ou Home Assistant) :
+
+| Champ | Quand le remplir |
+|---|---|
+| Débit soufflage mesuré à 100 % | Indispensable pour avoir des débits réels |
+| Débit soufflage mesuré à 50 % (option) | Améliore la précision en bas de plage (droite par 2 points) |
+| Débit extraction mesuré à 100 % | Débit d'extraction proportionnel à la vitesse |
+
+- Valeur **0** = non étalonné. Le soufflage reprend alors le « Débit estimé » saisi à la main, et l'extraction est estimée par soufflage × rapport des débits.
+- Les capteurs **Débit soufflage** et **Débit extraction** (m³/h) sont affichés sous les ventilateurs de la page web.
+- La **puissance et l'énergie récupérées** utilisent le débit de soufflage étalonné.
+- Le débit de soufflage tient compte de la baisse appliquée par l'antigel.

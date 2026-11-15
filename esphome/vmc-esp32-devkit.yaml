@@ -87,6 +87,9 @@ web_server:
     - id: grp_alert
       name: "Alertes et filtres"
       sorting_weight: 40
+    - id: grp_debits
+      name: "Étalonnage des débits"
+      sorting_weight: 48
     - id: grp_reglages
       name: "Réglages"
       sorting_weight: 50
@@ -240,6 +243,51 @@ output:
 
 # Débit estimé : à régler depuis HA (idéalement avec une mesure aux bouches)
 number:
+  - platform: template
+    id: etal_qs100
+    name: "Débit soufflage mesuré à 100 %"
+    web_server:
+      sorting_group_id: grp_debits
+      sorting_weight: 1
+    unit_of_measurement: "m³/h"
+    mode: box
+    min_value: 0
+    max_value: 400
+    step: 1
+    initial_value: 0
+    restore_value: true
+    optimistic: true
+    entity_category: config
+  - platform: template
+    id: etal_qs50
+    name: "Débit soufflage mesuré à 50 % (option)"
+    web_server:
+      sorting_group_id: grp_debits
+      sorting_weight: 2
+    unit_of_measurement: "m³/h"
+    mode: box
+    min_value: 0
+    max_value: 400
+    step: 1
+    initial_value: 0
+    restore_value: true
+    optimistic: true
+    entity_category: config
+  - platform: template
+    id: etal_qe100
+    name: "Débit extraction mesuré à 100 %"
+    web_server:
+      sorting_group_id: grp_debits
+      sorting_weight: 3
+    unit_of_measurement: "m³/h"
+    mode: box
+    min_value: 0
+    max_value: 400
+    step: 1
+    initial_value: 0
+    restore_value: true
+    optimistic: true
+    entity_category: config
   - platform: template
     id: antigel_seuil
     name: "Antigel – T rejet mini"
@@ -506,6 +554,56 @@ select:
     entity_category: config
 
 sensor:
+  # ---------- Débits calculés à partir de l'étalonnage (0 = non étalonné) ----------
+  - platform: template
+    id: q_souff
+    name: "Débit soufflage"
+    web_server:
+      sorting_group_id: grp_perf
+      sorting_weight: 9
+    icon: mdi:weather-windy
+    unit_of_measurement: "m³/h"
+    state_class: measurement
+    accuracy_decimals: 0
+    update_interval: 15s
+    lambda: |-
+      float q100 = id(etal_qs100).state, q50 = id(etal_qs50).state;
+      if (isnan(q100) || q100 <= 0) return id(debit).state;   // pas d'étalonnage : débit estimé saisi
+      float pct = id(v_souff).state - id(antigel_red);         // vitesse réellement envoyée
+      if (pct < 10) pct = 10; if (pct > 100) pct = 100;
+      float q;
+      if (!isnan(q50) && q50 > 0) q = q50 + (pct - 50.0f) * (q100 - q50) / 50.0f;  // droite par 2 points
+      else q = q100 * pct / 100.0f;                            // loi des ventilateurs : Q ~ vitesse
+      return q < 0 ? 0.0f : q;
+    filters:
+      - or:
+          - throttle: 300s
+          - delta: 2
+  - platform: template
+    id: q_extr
+    name: "Débit extraction"
+    web_server:
+      sorting_group_id: grp_perf
+      sorting_weight: 10
+    icon: mdi:weather-windy
+    unit_of_measurement: "m³/h"
+    state_class: measurement
+    accuracy_decimals: 0
+    update_interval: 15s
+    lambda: |-
+      float q100 = id(etal_qe100).state;
+      if (!isnan(q100) && q100 > 0) {
+        float pct = id(v_extr).state;
+        if (pct < 10) pct = 10; if (pct > 100) pct = 100;
+        return q100 * pct / 100.0f;
+      }
+      float r = id(rapport_debits).state, qs = id(q_souff).state;  // sinon : soufflage x rapport
+      if (isnan(r) || isnan(qs)) return NAN;
+      return qs * r;
+    filters:
+      - or:
+          - throttle: 300s
+          - delta: 2
   - platform: template
     name: "Antigel – baisse du soufflage"
     web_server:
@@ -837,8 +935,8 @@ sensor:
     accuracy_decimals: 0
     update_interval: 15s
     lambda: |-
-      // P ≈ 0,34 × Q × (T_insuf - T_ext)
-      float p = 0.34f * id(debit).state * (id(t_insuf).state - id(t_ext).state);
+      // P ≈ 0,34 × Q_soufflage (étalonné) × (T_insuf - T_ext)
+      float p = 0.34f * id(q_souff).state * (id(t_insuf).state - id(t_ext).state);
       return p > 0 ? p : 0.0f;
     filters:
       - or:

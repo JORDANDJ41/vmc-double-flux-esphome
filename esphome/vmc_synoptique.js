@@ -29,6 +29,8 @@
     bp: "By-pass (relais)",
     bpm: "By-pass \u2013 mode",
     ag: "Antigel \u2013 baisse du soufflage",
+    qs: "D\u00e9bit soufflage",
+    qe: "D\u00e9bit extraction",
   };
 
   const slug = (s) =>
@@ -204,8 +206,8 @@
   function render() {
     set("v-text", f1("text", "\u00b0C")); set("v-tins", f1("tins", "\u00b0C"));
     set("v-trep", f1("trep", "\u00b0C")); set("v-trej", f1("trej", "\u00b0C"));
-    set("v-vs", num("vs") === null ? "-- %" : Math.round(num("vs")) + " %");
-    set("v-ve", num("ve") === null ? "-- %" : Math.round(num("ve")) + " %");
+    set("v-vs", (num("vs") === null ? "-- %" : Math.round(num("vs")) + " %") + (num("qs") === null ? "" : " \u00b7 " + Math.round(num("qs")) + " m\u00b3/h"));
+    set("v-ve", (num("ve") === null ? "-- %" : Math.round(num("ve")) + " %") + (num("qe") === null ? "" : " \u00b7 " + Math.round(num("qe")) + " m\u00b3/h"));
     set("v-eta", num("eta") === null ? "-- %" : Math.round(num("eta")) + " %");
     set("v-pw", num("pw") === null ? "-- W" : Math.round(num("pw")) + " W");
     set("v-en", num("en") === null ? "-- kWh" : (num("en") / 1000).toFixed(2) + " kWh");

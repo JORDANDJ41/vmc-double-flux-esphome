@@ -9,6 +9,7 @@ Supervision et pilotage d'une **VMC double flux** (testé sur **Atlantic Duocosy
 - **4 sondes DS18B20** (air neuf, insufflation, reprise, rejet), avec **affectation des sondes modifiable depuis l'interface**, sans recompiler.
 - **Rendements** côté soufflage et côté extraction, rendement moyen sur 1 h, **puissance et énergie récupérées**.
 - **Rapport des débits extraction/soufflage**, calculé par bilan thermique de l'échangeur : équilibre ou dépression de la maison.
+- **Débits réels en m³/h** après saisie de mesures d'étalonnage (fil chaud), utilisés pour la puissance et l'énergie récupérées.
 - **Pression du réseau d'extraction**, mesurée par le capteur Huba d'origine (0,5-4,5 V = 0-300 Pa).
 - **Commande des 2 moteurs EC en 0-10 V**, de 10 à 100 %.
 - **Régulation automatique** : extraction **à pression constante** (consigne en Pa, comme la régulation hygro d'origine : quand les bouches s'ouvrent, l'extraction accélère), et soufflage en **suivi de l'extraction** (avec un écart réglable) ou en **équilibrage automatique** sur le rapport des débits.
