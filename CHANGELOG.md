@@ -2,6 +2,8 @@
 
 ## Prochaine version (non publiée)
 
+- **Remises à zéro datées** : l'ESP prend l'heure de Home Assistant (ou d'Internet en SNTP s'il tourne seul) et enregistre la date de la dernière remise à zéro de l'énergie (« Énergie récupérée – comptée depuis le ») et du dernier changement de filtres (« Filtres – changés le »).
+- Nouveau capteur **« Économie moyenne par jour »** (€/j) : économie ÷ nombre de jours depuis la remise à zéro datée de l'énergie.
 - Prix du kWh par défaut : **0,21 €** (tarif Base 2026, abonnement compris), au lieu de 0,17 €.
 
 ## v1.3.1 (15/11/2026) : économie calculée sur l'énergie
