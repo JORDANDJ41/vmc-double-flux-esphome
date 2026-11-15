@@ -1,0 +1,26 @@
+<svg viewBox="0 0 760 430" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Segoe UI,Roboto,sans-serif">
+<style>.rotor{transform-origin:0 0;animation:s 2.5s linear infinite}@keyframes s{to{transform:rotate(360deg)}}</style>
+<defs><marker id="fl" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1d2129"/></marker>
+<linearGradient id="c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a4150"/><stop offset="1" stop-color="#2a2f3a"/></linearGradient></defs>
+<rect width="760" height="430" rx="16" fill="#171a21"/>
+<text x="40" y="34" fill="#8ab4f8" font-size="15" font-weight="600">EXTÉRIEUR</text>
+<text x="720" y="34" fill="#f6b26b" font-size="15" font-weight="600" text-anchor="end">MAISON</text>
+<rect x="170" y="55" width="420" height="300" rx="14" fill="url(#c)" stroke="#5c6475" stroke-width="2"/>
+<text x="380" y="80" fill="#c9d1e0" font-size="14" text-anchor="middle">VMC double flux</text>
+<polyline points="172,110 300,110 340,165 420,245 470,250 498,170 530,140 590,110" fill="none" stroke="#8ab4f8" stroke-opacity=".35" stroke-width="5" stroke-dasharray="10 8"/>
+<polyline points="590,300 460,300 420,245 340,165 290,160 262,240 230,270 172,300" fill="none" stroke="#f6b26b" stroke-opacity=".35" stroke-width="5" stroke-dasharray="10 8"/>
+<polyline points="172,110 300,92 470,92 520,118" fill="none" stroke="#8ab4f8" stroke-width="5" stroke-dasharray="4 6" stroke-opacity=".2"/>
+<g transform="translate(380,205)"><path d="M0,-80 L80,0 L0,80 L-80,0Z" fill="#2f3747" stroke="#7d8aa3" stroke-width="2"/>
+<path d="M-56,-24 L24,56 M-40,-40 L40,40 M-24,-56 L56,24" stroke="#56627a" stroke-width="2"/>
+<text y="-10" fill="#c9d1e0" font-size="12" text-anchor="middle">échangeur</text></g>
+<line x1="30" y1="110" x2="168" y2="110" stroke="#8ab4f8" stroke-width="10" stroke-linecap="round"/><line x1="60" y1="110" x2="150" y2="110" stroke="#1d2129" stroke-width="2" marker-end="url(#fl)"/>
+<line x1="30" y1="300" x2="168" y2="300" stroke="#6f7b91" stroke-width="10" stroke-linecap="round"/><line x1="150" y1="300" x2="60" y2="300" stroke="#1d2129" stroke-width="2" marker-end="url(#fl)"/>
+<line x1="592" y1="110" x2="730" y2="110" stroke="#f6b26b" stroke-width="10" stroke-linecap="round"/><line x1="610" y1="110" x2="700" y2="110" stroke="#1d2129" stroke-width="2" marker-end="url(#fl)"/>
+<line x1="592" y1="300" x2="730" y2="300" stroke="#c98a4a" stroke-width="10" stroke-linecap="round"/><line x1="700" y1="300" x2="610" y2="300" stroke="#1d2129" stroke-width="2" marker-end="url(#fl)"/>
+<g transform="translate(530,140)"><circle r="34" fill="#1d2129" stroke="#8a93a6" stroke-width="2"/><g class="rotor"><path d="M0,0 C6,-10 20,-22 30,-12 C22,-6 10,-2 0,0Z" fill="#9fb3d1" transform="rotate(0)"/><path d="M0,0 C6,-10 20,-22 30,-12 C22,-6 10,-2 0,0Z" fill="#9fb3d1" transform="rotate(72)"/><path d="M0,0 C6,-10 20,-22 30,-12 C22,-6 10,-2 0,0Z" fill="#9fb3d1" transform="rotate(144)"/><path d="M0,0 C6,-10 20,-22 30,-12 C22,-6 10,-2 0,0Z" fill="#9fb3d1" transform="rotate(216)"/><path d="M0,0 C6,-10 20,-22 30,-12 C22,-6 10,-2 0,0Z" fill="#9fb3d1" transform="rotate(288)"/><circle r="6" fill="#d0d7e3"/></g></g><text x="530" y="190" fill="#c9d1e0" font-size="12" text-anchor="middle">soufflage</text>
+<g transform="translate(230,270)"><circle r="34" fill="#1d2129" stroke="#8a93a6" stroke-width="2"/><g class="rotor"><path d="M0,0 C6,-10 20,-22 30,-12 C22,-6 10,-2 0,0Z" fill="#9fb3d1" transform="rotate(0)"/><path d="M0,0 C6,-10 20,-22 30,-12 C22,-6 10,-2 0,0Z" fill="#9fb3d1" transform="rotate(72)"/><path d="M0,0 C6,-10 20,-22 30,-12 C22,-6 10,-2 0,0Z" fill="#9fb3d1" transform="rotate(144)"/><path d="M0,0 C6,-10 20,-22 30,-12 C22,-6 10,-2 0,0Z" fill="#9fb3d1" transform="rotate(216)"/><path d="M0,0 C6,-10 20,-22 30,-12 C22,-6 10,-2 0,0Z" fill="#9fb3d1" transform="rotate(288)"/><circle r="6" fill="#d0d7e3"/></g></g><text x="230" y="320" fill="#c9d1e0" font-size="12" text-anchor="middle">extraction</text>
+<g font-size="12" fill="#c9d1e0"><text x="40" y="95">Air neuf</text><text x="40" y="285">Rejet</text>
+<text x="720" y="95" text-anchor="end">Insufflation</text><text x="720" y="285" text-anchor="end">Reprise</text></g>
+<g font-size="12" fill="#8a93a6"><text x="45" y="388">Puissance récupérée</text><text x="235" y="388">Énergie récupérée</text>
+<text x="420" y="388">Équilibre débits</text><text x="595" y="388">Pression extraction</text></g>
+</svg>

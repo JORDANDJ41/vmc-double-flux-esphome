@@ -1,0 +1,833 @@
+# Board: KinCony KC868-A6
+# Definition: definitions/boards/kincony_kc868_a6/manifest.yaml
+
+# =====================================================================
+#  VMC Duocosy HR HY — pilotage complet sur KinCony KC868-A6 (ESP32)
+#  Version préparée le 15/11/2026 — à flasher à réception de la carte
+#
+#  Appareil "vmc" créé dans ESPHome Builder : garder la clé API, le mot de
+#  passe du point d'accès et la section wifi générés par le Builder.
+#
+#  CÂBLAGE (bornier basse tension du haut) :
+#    DA-1  -> fil JAUNE moteur SOUFFLAGE      (0-10 V)
+#    DA-2  -> fil JAUNE moteur EXTRACTION     (0-10 V)
+#    GND   -> fils BLEUS des 2 moteurs (à côté de DA-1/DA-2)
+#    Fils ROUGES (+10 V) des moteurs : NON utilisés, isolés (WAGO ou gaine),
+#    retirer les résistances des WAGO.
+#    A1    -> fil JAUNE Huba (signal 0,5-4,5 V), sans pont diviseur
+#    GND   -> fil VERT Huba
+#    +12 V -> fil BLEU Huba, pris sur l'arrivée +12 V de la carte (bornier alim)
+#    IO-1  -> DATA des 4 sondes DS18B20 ; alim sondes sur la borne d'alim
+#             capteurs voisine + GND
+#  RELAIS (bornier 230 V du bas) — câblés sur contact NF (NC) :
+#    Relais 1 : phase L moteur SOUFFLAGE   (COM = arrivée L, NC = départ moteur)
+#    Relais 2 : phase L moteur EXTRACTION
+#    Relais non alimenté = moteur en marche (sécurité si la carte tombe en panne)
+#    Relais 3 : by-pass 230 V à rappel ressort : COM = phase L, NO = fil phase actionneur,
+#               neutre de l'actionneur en direct. Hors tension = fermé (récupération).
+#  ALIMENTATION : 12 V DC, 1 A mini, sur le bornier +12V / GND de la carte.
+# =====================================================================
+
+substitutions:
+  delta_min: "6.0"        # écart T_rep - T_ext mini pour un rendement exploitable (°C)
+  # Échelle des sorties 0-10 V : mesurer au Fluke DA-1 à 100 % et ajuster
+  # (ex. 10,4 V mesurés -> 10 / 10,4 = 0.96)
+  dac_echelle: "1.0"
+  # Échelle de l'entrée analogique A1 (0-5 V carte -> 0-3,3 V ESP) : à étalonner
+  # en comparant "Capteur pression – tension" avec le Fluke sur le fil jaune du Huba
+  ai_echelle: "1.52"
+
+esphome:
+  name: vmc
+  friendly_name: VMC
+  on_boot:
+    priority: -100
+    then:
+      - component.update: filtre_jours
+      - number.set:
+          id: v_souff
+          value: !lambda return id(v_souff).state;
+      - number.set:
+          id: v_extr
+          value: !lambda return id(v_extr).state;
+
+esp32:
+  variant: esp32
+  flash_size: 4MB
+  framework:
+    type: esp-idf
+
+logger:
+
+api:
+  encryption:
+    key: !secret vmc_api_key
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "VMC Fallback Hotspot"
+    password: !secret ap_password
+
+captive_portal:
+
+# ---------------------------------------------------------------------
+#  Page web locale : http://<adresse-IP-de-l-ESP>  (ou http://NOM.local)
+#  Fonctionne sans Home Assistant ni Internet.
+# ---------------------------------------------------------------------
+web_server:
+  port: 80
+  version: 3
+  # local: false (par défaut) : nécessaire pour que js_include soit chargé.
+  # Le schéma est servi par l'ESP et marche sans Internet ; seule la page
+  # de configuration ESPHome (bouton Configurer) charge son interface depuis Internet.
+  js_include: "vmc_synoptique.js"   # schéma de la VMC (fichier à placer dans /config/esphome/)
+  # auth:                # à activer pour un client :
+  #   username: admin
+  #   password: "choisir_un_mot_de_passe"
+  sorting_groups:
+    - id: grp_temp
+      name: "Températures"
+      sorting_weight: 10
+    - id: grp_perf
+      name: "Performances"
+      sorting_weight: 20
+    - id: grp_cmd
+      name: "Commande ventilateurs"
+      sorting_weight: 30
+    - id: grp_alert
+      name: "Alertes et filtres"
+      sorting_weight: 40
+    - id: grp_bypass
+      name: "By-pass (free-cooling)"
+      sorting_weight: 45
+    - id: grp_reglages
+      name: "Réglages"
+      sorting_weight: 50
+    - id: grp_sondes
+      name: "Sondes – affectation"
+      sorting_weight: 55
+    - id: grp_diag
+      name: "Diagnostic"
+      sorting_weight: 60
+
+# ---------------- Bus de la carte KinCony ----------------
+i2c:
+  sda: GPIO4
+  scl:
+    number: GPIO15
+    ignore_strapping_warning: true
+
+pcf8574:
+  - id: entrees
+    address: 0x22
+  - id: sorties
+    address: 0x24
+
+one_wire:
+  - platform: gpio
+    pin: GPIO32          # borne IO-1
+
+# ---------------------------------------------------------------------
+#  Compteur filtres : heures d'utilisation depuis le dernier changement
+# ---------------------------------------------------------------------
+globals:
+  - id: filtre_heures
+    type: uint32_t
+    restore_value: true
+    initial_value: '0'
+
+script:
+  # Free-cooling (principe Atlantic 24 °C / 12 °C) :
+  # ouvre si la maison est trop chaude ET que l'air neuf est plus frais (mais pas trop froid).
+  - id: bypass_regul
+    mode: restart
+    then:
+      - lambda: |-
+          // 0 = Automatique, 1 = Forcé fermé, 2 = Forcé ouvert
+          auto idx = id(bp_mode).active_index();
+          int m = idx.has_value() ? (int) *idx : 1;
+          bool ouvrir = id(relais_bypass).state;
+          if (m == 2) ouvrir = true;
+          else if (m == 1) ouvrir = false;
+          else {
+            float tr = id(t_rep).state, te = id(t_ext).state;
+            if (isnan(tr) || isnan(te)) ouvrir = false;          // sonde absente : fermé
+            else if (!ouvrir) {
+              ouvrir = tr > id(bp_t_rep).state
+                    && te > id(bp_t_ext_min).state
+                    && te < tr - id(bp_ecart).state;
+            } else {                                              // hystérésis 1 °C
+              ouvrir = tr > id(bp_t_rep).state - 1.0f
+                    && te > id(bp_t_ext_min).state - 1.0f
+                    && te < tr - id(bp_ecart).state + 0.5f;
+            }
+          }
+          if (ouvrir != id(relais_bypass).state) {
+            if (ouvrir) id(relais_bypass).turn_on(); else id(relais_bypass).turn_off();
+            ESP_LOGI("bypass", "By-pass %s (mode %d)", ouvrir ? "OUVERT" : "FERME", m);
+          }
+
+interval:
+  - interval: 5min
+    then:
+      - script.execute: bypass_regul
+  - interval: 1h
+    then:
+      - lambda: |-
+          id(filtre_heures) += 1;
+      - component.update: filtre_jours
+
+# ---------------------------------------------------------------------
+#  Sorties 0-10 V de la carte (DAC ESP32 + ampli LM258)
+#  DA-1 = GPIO26 -> soufflage ; DA-2 = GPIO25 -> extraction
+# ---------------------------------------------------------------------
+output:
+  - platform: esp32_dac
+    id: dac_souff
+    pin: GPIO26
+  - platform: esp32_dac
+    id: dac_extr
+    pin: GPIO25
+
+# ---------------------------------------------------------------------
+#  Relais de coupure 230 V (câblés en NF) : ON = moteur COUPÉ
+# ---------------------------------------------------------------------
+switch:
+  - platform: gpio
+    id: coupure_souff
+    name: "Coupure moteur soufflage"
+    web_server:
+      sorting_group_id: grp_cmd
+      sorting_weight: 3
+    icon: mdi:fan-off
+    restore_mode: ALWAYS_OFF
+    pin:
+      pcf8574: sorties
+      number: 0
+      mode: OUTPUT
+      inverted: true
+  - platform: gpio
+    id: coupure_extr
+    name: "Coupure moteur extraction"
+    web_server:
+      sorting_group_id: grp_cmd
+      sorting_weight: 4
+    icon: mdi:fan-off
+    restore_mode: ALWAYS_OFF
+    pin:
+      pcf8574: sorties
+      number: 1
+      mode: OUTPUT
+      inverted: true
+
+  # Relais 3 : commande du by-pass (contact sec : peut commuter du 12 V ou du 230 V)
+  # ON = by-pass OUVERT (air neuf qui contourne l'échangeur). Si ton actionneur
+  # fonctionne à l'inverse, mettre "inverted: false" ci-dessous.
+  - platform: gpio
+    id: relais_bypass
+    name: "By-pass (relais)"
+    web_server:
+      sorting_group_id: grp_bypass
+      sorting_weight: 5
+    icon: mdi:valve
+    restore_mode: ALWAYS_OFF
+    pin:
+      pcf8574: sorties
+      number: 2
+      mode: OUTPUT
+      inverted: true
+
+number:
+  - platform: template
+    id: bp_t_rep
+    name: "By-pass – ouverture si reprise >"
+    web_server:
+      sorting_group_id: grp_bypass
+      sorting_weight: 2
+    unit_of_measurement: "°C"
+    min_value: 20
+    max_value: 30
+    step: 0.5
+    initial_value: 24
+    restore_value: true
+    optimistic: true
+    entity_category: config
+  - platform: template
+    id: bp_t_ext_min
+    name: "By-pass – air neuf mini"
+    web_server:
+      sorting_group_id: grp_bypass
+      sorting_weight: 3
+    unit_of_measurement: "°C"
+    min_value: 8
+    max_value: 20
+    step: 0.5
+    initial_value: 12
+    restore_value: true
+    optimistic: true
+    entity_category: config
+  - platform: template
+    id: bp_ecart
+    name: "By-pass – écart mini reprise/air neuf"
+    web_server:
+      sorting_group_id: grp_bypass
+      sorting_weight: 4
+    unit_of_measurement: "°C"
+    min_value: 1
+    max_value: 6
+    step: 0.5
+    initial_value: 2
+    restore_value: true
+    optimistic: true
+    entity_category: config
+
+  - platform: template
+    id: debit
+    name: "Débit estimé"
+    web_server:
+      sorting_group_id: grp_reglages
+      sorting_weight: 1
+    unit_of_measurement: "m³/h"
+    min_value: 40
+    max_value: 280
+    step: 5
+    initial_value: 120
+    restore_value: true
+    optimistic: true
+    entity_category: config
+
+  - platform: template
+    id: filtre_seuil
+    name: "Filtres – seuil de changement"
+    web_server:
+      sorting_group_id: grp_reglages
+      sorting_weight: 2
+    unit_of_measurement: "j"
+    min_value: 30
+    max_value: 400
+    step: 15
+    initial_value: 180
+    restore_value: true
+    optimistic: true
+    entity_category: config
+
+  # 10 % = 1 V ... 100 % = 10 V sur le fil jaune
+  - platform: template
+    id: v_souff
+    name: "Vitesse soufflage"
+    web_server:
+      sorting_group_id: grp_cmd
+      sorting_weight: 1
+    icon: mdi:fan
+    unit_of_measurement: "%"
+    min_value: 10
+    max_value: 100
+    step: 1
+    initial_value: 100
+    restore_value: true
+    optimistic: true
+    set_action:
+      - output.set_level:
+          id: dac_souff
+          level: !lambda |-
+            float l = x / 100.0f * ${dac_echelle};
+            return l > 1.0f ? 1.0f : l;
+
+  - platform: template
+    id: v_extr
+    name: "Vitesse extraction"
+    web_server:
+      sorting_group_id: grp_cmd
+      sorting_weight: 2
+    icon: mdi:fan
+    unit_of_measurement: "%"
+    min_value: 10
+    max_value: 100
+    step: 1
+    initial_value: 100
+    restore_value: true
+    optimistic: true
+    set_action:
+      - output.set_level:
+          id: dac_extr
+          level: !lambda |-
+            float l = x / 100.0f * ${dac_echelle};
+            return l > 1.0f ? 1.0f : l;
+
+select:
+  - platform: template
+    id: bp_mode
+    name: "By-pass – mode"
+    web_server:
+      sorting_group_id: grp_bypass
+      sorting_weight: 1
+    icon: mdi:valve
+    options: ["Automatique", "Forcé fermé", "Forcé ouvert"]
+    initial_option: "Forcé fermé"
+    restore_value: true
+    optimistic: true
+    on_value:
+      - script.execute: bypass_regul
+
+  - platform: template
+    id: sel_ext
+    name: "Affectation – air neuf (extérieur)"
+    web_server:
+      sorting_group_id: grp_sondes
+      sorting_weight: 5
+    options: ["Sonde 1", "Sonde 2", "Sonde 3", "Sonde 4"]
+    initial_option: "Sonde 1"
+    restore_value: true
+    optimistic: true
+    entity_category: config
+
+  - platform: template
+    id: sel_insuf
+    name: "Affectation – insufflation"
+    web_server:
+      sorting_group_id: grp_sondes
+      sorting_weight: 6
+    options: ["Sonde 1", "Sonde 2", "Sonde 3", "Sonde 4"]
+    initial_option: "Sonde 2"
+    restore_value: true
+    optimistic: true
+    entity_category: config
+
+  - platform: template
+    id: sel_rep
+    name: "Affectation – reprise (air extrait)"
+    web_server:
+      sorting_group_id: grp_sondes
+      sorting_weight: 7
+    options: ["Sonde 1", "Sonde 2", "Sonde 3", "Sonde 4"]
+    initial_option: "Sonde 3"
+    restore_value: true
+    optimistic: true
+    entity_category: config
+
+  - platform: template
+    id: sel_rejet
+    name: "Affectation – rejet"
+    web_server:
+      sorting_group_id: grp_sondes
+      sorting_weight: 8
+    options: ["Sonde 1", "Sonde 2", "Sonde 3", "Sonde 4"]
+    initial_option: "Sonde 4"
+    restore_value: true
+    optimistic: true
+    entity_category: config
+
+sensor:
+  # ---------------- Sondes brutes (ordre de détection sur le bus) ----------------
+  # Affectation des rôles depuis la page web / HA (section "Sondes") : chauffer une
+  # sonde entre les doigts, repérer laquelle monte, et choisir le bon rôle.
+  - platform: dallas_temp
+    id: sonde_1
+    name: "Sonde 1"
+    web_server:
+      sorting_group_id: grp_sondes
+      sorting_weight: 1
+    index: 0
+    update_interval: 15s
+    entity_category: diagnostic
+  - platform: dallas_temp
+    id: sonde_2
+    name: "Sonde 2"
+    web_server:
+      sorting_group_id: grp_sondes
+      sorting_weight: 2
+    index: 1
+    update_interval: 15s
+    entity_category: diagnostic
+  - platform: dallas_temp
+    id: sonde_3
+    name: "Sonde 3"
+    web_server:
+      sorting_group_id: grp_sondes
+      sorting_weight: 3
+    index: 2
+    update_interval: 15s
+    entity_category: diagnostic
+  - platform: dallas_temp
+    id: sonde_4
+    name: "Sonde 4"
+    web_server:
+      sorting_group_id: grp_sondes
+      sorting_weight: 4
+    index: 3
+    update_interval: 15s
+    entity_category: diagnostic
+
+  # ---------------- Températures par rôle (selon l'affectation) ----------------
+  - platform: template
+    id: t_ext
+    name: "T air neuf (extérieur)"
+    web_server:
+      sorting_group_id: grp_temp
+      sorting_weight: 1
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: 15s
+    lambda: |-
+      auto i = id(sel_ext).active_index();
+      if (!i.has_value()) return NAN;
+      switch (*i) {
+        case 0: return id(sonde_1).state;
+        case 1: return id(sonde_2).state;
+        case 2: return id(sonde_3).state;
+        case 3: return id(sonde_4).state;
+      }
+      return NAN;
+    filters:
+      - or:
+          - throttle: 60s
+          - delta: 0.1
+  - platform: template
+    id: t_insuf
+    name: "T insufflation"
+    web_server:
+      sorting_group_id: grp_temp
+      sorting_weight: 2
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: 15s
+    lambda: |-
+      auto i = id(sel_insuf).active_index();
+      if (!i.has_value()) return NAN;
+      switch (*i) {
+        case 0: return id(sonde_1).state;
+        case 1: return id(sonde_2).state;
+        case 2: return id(sonde_3).state;
+        case 3: return id(sonde_4).state;
+      }
+      return NAN;
+    filters:
+      - or:
+          - throttle: 60s
+          - delta: 0.1
+  - platform: template
+    id: t_rep
+    name: "T reprise (air extrait)"
+    web_server:
+      sorting_group_id: grp_temp
+      sorting_weight: 3
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: 15s
+    lambda: |-
+      auto i = id(sel_rep).active_index();
+      if (!i.has_value()) return NAN;
+      switch (*i) {
+        case 0: return id(sonde_1).state;
+        case 1: return id(sonde_2).state;
+        case 2: return id(sonde_3).state;
+        case 3: return id(sonde_4).state;
+      }
+      return NAN;
+    filters:
+      - or:
+          - throttle: 60s
+          - delta: 0.1
+  - platform: template
+    id: t_rejet
+    name: "T rejet"
+    web_server:
+      sorting_group_id: grp_temp
+      sorting_weight: 4
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: 15s
+    lambda: |-
+      auto i = id(sel_rejet).active_index();
+      if (!i.has_value()) return NAN;
+      switch (*i) {
+        case 0: return id(sonde_1).state;
+        case 1: return id(sonde_2).state;
+        case 2: return id(sonde_3).state;
+        case 3: return id(sonde_4).state;
+      }
+      return NAN;
+    filters:
+      - or:
+          - throttle: 60s
+          - delta: 0.1
+
+  # ---------------- Diagnostic ----------------
+  - platform: wifi_signal
+    name: "Signal Wi-Fi"
+    web_server:
+      sorting_group_id: grp_diag
+      sorting_weight: 2
+    update_interval: 60s
+    entity_category: diagnostic
+  - platform: uptime
+    name: "Temps de fonctionnement"
+    web_server:
+      sorting_group_id: grp_diag
+      sorting_weight: 3
+    entity_category: diagnostic
+
+  # ---------------- Capteur de pression Huba (réseau d'extraction) ----------------
+  # Sortie 0,5-4,5 V = 0-300 Pa, branchée directement sur A1 (GPIO36), alimenté en 12 V
+  - platform: adc
+    id: huba_v
+    pin: GPIO36          # borne A1
+    name: "Capteur pression – tension"
+    web_server:
+      sorting_group_id: grp_diag
+      sorting_weight: 1
+    attenuation: 12db
+    update_interval: 5s
+    unit_of_measurement: "V"
+    accuracy_decimals: 2
+    entity_category: diagnostic
+    filters:
+      - multiply: ${ai_echelle}
+      - sliding_window_moving_average:
+          window_size: 6
+          send_every: 3
+
+  - platform: template
+    id: p_extraction
+    name: "Pression réseau extraction"
+    web_server:
+      sorting_group_id: grp_perf
+      sorting_weight: 6
+    unit_of_measurement: "Pa"
+    device_class: pressure
+    state_class: measurement
+    accuracy_decimals: 0
+    update_interval: 15s
+    lambda: |-
+      float v = id(huba_v).state;
+      if (isnan(v) || v > 5.2f) return NAN;
+      float p = (v - 0.5f) / 4.0f * 300.0f;       // 0,5-4,5 V -> 0-300 Pa
+      return p < 0 ? 0.0f : p;
+    filters:
+      - or:
+          - throttle: 300s
+          - delta: 1
+
+  - platform: template
+    id: filtre_jours
+    name: "Filtres – jours d'utilisation"
+    web_server:
+      sorting_group_id: grp_alert
+      sorting_weight: 5
+    unit_of_measurement: "j"
+    icon: mdi:air-filter
+    accuracy_decimals: 0
+    update_interval: never
+    lambda: |-
+      return id(filtre_heures) / 24.0f;
+
+  - platform: template
+    id: eta_souff
+    name: "Rendement côté soufflage"
+    web_server:
+      sorting_group_id: grp_perf
+      sorting_weight: 2
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    update_interval: 15s
+    lambda: |-
+      float d = id(t_rep).state - id(t_ext).state;
+      if (isnan(d) || d < ${delta_min}) return NAN;
+      return 100.0f * (id(t_insuf).state - id(t_ext).state) / d;
+    filters:
+      - or:
+          - throttle: 300s
+          - delta: 1
+
+  - platform: template
+    id: eta_extr
+    name: "Rendement côté extraction"
+    web_server:
+      sorting_group_id: grp_perf
+      sorting_weight: 3
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    update_interval: 15s
+    lambda: |-
+      float d = id(t_rep).state - id(t_ext).state;
+      if (isnan(d) || d < ${delta_min}) return NAN;
+      return 100.0f * (id(t_rep).state - id(t_rejet).state) / d;
+    filters:
+      - or:
+          - throttle: 300s
+          - delta: 1
+
+  - platform: template
+    name: "Rendement moyen 1 h"
+    web_server:
+      sorting_group_id: grp_perf
+      sorting_weight: 1
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    update_interval: 60s
+    lambda: |-
+      return id(eta_souff).state;
+    filters:
+      - filter_out: nan
+      - sliding_window_moving_average:
+          window_size: 60
+          send_every: 5
+
+  # Écart entre les deux rendements : indicateur de déséquilibre / encrassement d'un côté
+  - platform: template
+    name: "Écart rendements"
+    web_server:
+      sorting_group_id: grp_perf
+      sorting_weight: 4
+    unit_of_measurement: "pts"
+    accuracy_decimals: 0
+    update_interval: 15s
+    lambda: |-
+      float d = id(t_rep).state - id(t_ext).state;
+      if (isnan(d) || d < ${delta_min}) return NAN;
+      float gain  = id(t_insuf).state - id(t_ext).state;
+      float perte = id(t_rep).state - id(t_rejet).state;
+      return 100.0f * (gain - perte) / d;
+    filters:
+      - or:
+          - throttle: 300s
+          - delta: 1
+
+  # Rapport des débits extraction / soufflage, par bilan thermique de l'échangeur
+  # 1,0 = équilibré ; > 1 = plus d'extraction que de soufflage (maison en dépression)
+  - platform: template
+    id: rapport_debits
+    name: "Rapport débits extraction sur soufflage"
+    web_server:
+      sorting_group_id: grp_perf
+      sorting_weight: 5
+    icon: mdi:scale-balance
+    accuracy_decimals: 2
+    state_class: measurement
+    update_interval: 15s
+    lambda: |-
+      float d = id(t_rep).state - id(t_ext).state;
+      if (isnan(d) || d < ${delta_min}) return NAN;
+      float gain  = id(t_insuf).state - id(t_ext).state;
+      float perte = id(t_rep).state - id(t_rejet).state;
+      if (isnan(gain) || isnan(perte) || perte < 0.5f) return NAN;
+      return gain / perte;
+    filters:
+      - sliding_window_moving_average:
+          window_size: 20
+          send_every: 4
+
+  - platform: template
+    id: p_recup
+    name: "Puissance récupérée"
+    web_server:
+      sorting_group_id: grp_perf
+      sorting_weight: 7
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    accuracy_decimals: 0
+    update_interval: 15s
+    lambda: |-
+      // P ≈ 0,34 × Q × (T_insuf - T_ext)
+      float p = 0.34f * id(debit).state * (id(t_insuf).state - id(t_ext).state);
+      return p > 0 ? p : 0.0f;
+    filters:
+      - or:
+          - throttle: 300s
+          - delta: 5
+
+  - platform: integration
+    id: e_recup
+    sensor: p_recup
+    name: "Énergie récupérée"
+    web_server:
+      sorting_group_id: grp_perf
+      sorting_weight: 8
+    time_unit: h
+    unit_of_measurement: "Wh"
+    device_class: energy
+    state_class: total_increasing
+    restore: true
+
+binary_sensor:
+  - platform: template
+    name: "By-pass probablement ouvert"
+    web_server:
+      sorting_group_id: grp_alert
+      sorting_weight: 3
+    lambda: |-
+      float d = id(t_rep).state - id(t_ext).state;
+      if (isnan(d) || d < ${delta_min}) return false;
+      return id(eta_souff).state < 30.0f;
+    filters:
+      - delayed_on: 10min
+
+  - platform: template
+    name: "Risque givrage échangeur"
+    web_server:
+      sorting_group_id: grp_alert
+      sorting_weight: 2
+    device_class: cold
+    lambda: |-
+      return id(t_rejet).state < 1.0f;
+    filters:
+      - delayed_on: 5min
+
+  - platform: template
+    name: "Air soufflé froid"
+    web_server:
+      sorting_group_id: grp_alert
+      sorting_weight: 1
+    device_class: cold
+    lambda: |-
+      return id(t_insuf).state < 15.0f;
+    filters:
+      - delayed_on: 10min
+
+
+  - platform: template
+    name: "Filtres à changer"
+    web_server:
+      sorting_group_id: grp_alert
+      sorting_weight: 4
+    device_class: problem
+    icon: mdi:air-filter
+    lambda: |-
+      return (id(filtre_heures) / 24.0f) >= id(filtre_seuil).state;
+
+button:
+  - platform: template
+    name: "Remise à zéro énergie récupérée"
+    web_server:
+      sorting_group_id: grp_reglages
+      sorting_weight: 3
+    entity_category: config
+    on_press:
+      - sensor.integration.reset: e_recup
+
+  - platform: template
+    name: "Filtres changés (remise à zéro)"
+    web_server:
+      sorting_group_id: grp_alert
+      sorting_weight: 6
+    icon: mdi:air-filter
+    on_press:
+      - lambda: |-
+          id(filtre_heures) = 0;
+          global_preferences->sync();
+      - component.update: filtre_jours
+

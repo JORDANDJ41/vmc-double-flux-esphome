@@ -1,0 +1,86 @@
+type: picture-elements
+image: /local/vmc_ha.svg
+elements:
+  # ---------- Températures ----------
+  - type: state-label
+    entity: sensor.vmc_t_air_neuf_exterieur
+    style: {left: 12.5%, top: 31.4%, color: "#8ab4f8", font-weight: 700, font-size: "clamp(13px, 2.6vw, 21px)"}
+  - type: state-label
+    entity: sensor.vmc_t_rejet
+    style: {left: 12.5%, top: 75.6%, color: "#9aa3b5", font-weight: 700, font-size: "clamp(13px, 2.6vw, 21px)"}
+  - type: state-label
+    entity: sensor.vmc_t_insufflation
+    style: {left: 87.5%, top: 31.4%, color: "#f6b26b", font-weight: 700, font-size: "clamp(13px, 2.6vw, 21px)"}
+  - type: state-label
+    entity: sensor.vmc_t_reprise_air_extrait
+    style: {left: 87.5%, top: 75.6%, color: "#e6a157", font-weight: 700, font-size: "clamp(13px, 2.6vw, 21px)"}
+
+  # ---------- Échangeur et ventilateurs ----------
+  - type: state-label
+    entity: sensor.vmc_rendement_moyen_1_h
+    style: {left: 50%, top: 51.5%, color: "#7ee08a", font-weight: 700, font-size: "clamp(13px, 2.6vw, 21px)"}
+  - type: state-label
+    entity: number.vmc_vitesse_soufflage
+    style: {left: 69.7%, top: 47.5%, color: "white", font-weight: 700, font-size: "clamp(11px, 1.8vw, 15px)"}
+  - type: state-label
+    entity: number.vmc_vitesse_extraction
+    style: {left: 30.3%, top: 77.7%, color: "white", font-weight: 700, font-size: "clamp(11px, 1.8vw, 15px)"}
+
+  # ---------- Bandeau bas ----------
+  - type: state-label
+    entity: sensor.vmc_puissance_recuperee
+    style: {left: 14.5%, top: 95%, color: "white", font-weight: 700, font-size: "clamp(12px, 2.1vw, 17px)"}
+  - type: state-label
+    entity: sensor.vmc_energie_recuperee
+    style: {left: 39.5%, top: 95%, color: "white", font-weight: 700, font-size: "clamp(12px, 2.1vw, 17px)"}
+  - type: state-label
+    entity: sensor.vmc_rapport_debits_extraction_sur_soufflage
+    style: {left: 62.5%, top: 95%, color: "white", font-weight: 700, font-size: "clamp(12px, 2.1vw, 17px)"}
+  - type: state-label
+    entity: sensor.vmc_pression_reseau_extraction
+    style: {left: 85%, top: 95%, color: "white", font-weight: 700, font-size: "clamp(12px, 2.1vw, 17px)"}
+
+  # ---------- Alertes (n'apparaissent que si actives) ----------
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: binary_sensor.vmc_risque_givrage_echangeur
+        state: "on"
+    elements:
+      - type: state-icon
+        entity: binary_sensor.vmc_risque_givrage_echangeur
+        icon: mdi:snowflake-alert
+        style: {left: 30%, top: 20%, color: "#ff6b6b", "--mdc-icon-size": "30px"}
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: binary_sensor.vmc_air_souffle_froid
+        state: "on"
+    elements:
+      - type: state-icon
+        entity: binary_sensor.vmc_air_souffle_froid
+        icon: mdi:weather-windy
+        style: {left: 70%, top: 20%, color: "#ffd27a", "--mdc-icon-size": "30px"}
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: binary_sensor.vmc_filtres_a_changer
+        state: "on"
+    elements:
+      - type: state-icon
+        entity: binary_sensor.vmc_filtres_a_changer
+        icon: mdi:air-filter
+        style: {left: 50%, top: 80%, color: "#ff6b6b", "--mdc-icon-size": "30px"}
+
+
+  # ---------- By-pass : surimpression quand il est ouvert ----------
+  # (ne s'affiche que si l'entité existe et vaut "on" : sans effet avant la KinCony)
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: switch.vmc_by_pass_relais
+        state: "on"
+    elements:
+      - type: image
+        image: /local/vmc_ha_bypass.svg
+        style: {left: 50%, top: 50%, width: 100%}
