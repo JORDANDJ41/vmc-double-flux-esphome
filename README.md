@@ -57,6 +57,14 @@ Détails : [`docs/cablage-kincony-a6.md`](docs/cablage-kincony-a6.md), [`docs/ca
 - **Débits** : pour l'énergie, gardez la maison en légère dépression (rapport des débits entre 1,0 et 1,1). Avec un **appareil à combustion qui prend son air dans la pièce** (poêle, insert…), évitez toute forte dépression et installez un détecteur de CO.
 - Le code `admin` de la page web ne fait que **masquer** la configuration. Pour une vraie protection, activez `auth:` dans `web_server`.
 
+## ☕ Soutenir le projet
+
+Ce projet est gratuit et open source. S'il vous a aidé, fait gagner du temps ou économiser de l'énergie, vous pouvez m'offrir un café : ça m'aide à continuer à tester, améliorer et documenter.
+
+[![Soutenir sur Ko-fi](https://img.shields.io/badge/Ko--fi-Offrir%20un%20caf%C3%A9-ff5e5b?logo=ko-fi&logoColor=white)](https://ko-fi.com/jordandj41)
+
+Les retours, idées et contributions (issues, pull requests) sont aussi les bienvenus !
+
 ## Licence
 
 MIT. Voir [`LICENSE`](LICENSE).
