@@ -32,6 +32,10 @@ Supervision et pilotage d'une **VMC double flux** (testé sur **Atlantic Duocosy
 | Relais | 6 (coupure des moteurs, by-pass…) | aucun |
 | Carte d'origine | **supprimée** | conservée (uniquement pour le 12 V du Huba) |
 
+## 📖 Notice complète
+
+**[docs/notice.md](docs/notice.md)** : installation pas à pas, câblage, premier démarrage, explication de **chaque réglage**, cartes Home Assistant, mise en service, dépannage et mises à jour.
+
 ## Installation (résumé)
 
 1. **ESPHome Builder** → créer un appareil (la carte « KinCony KC868-A6 » est proposée), puis coller la config. Remplir les secrets en partant de `esphome/secrets.example.yaml`.
