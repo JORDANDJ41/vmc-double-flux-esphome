@@ -106,6 +106,10 @@ one_wire:
 #  (enregistré en mémoire flash une fois par heure, conservé au redémarrage)
 # ---------------------------------------------------------------------
 globals:
+  - id: antigel_red        # réduction du soufflage par l'antigel (%)
+    type: float
+    restore_value: false
+    initial_value: '0'
   - id: regul_ecrit        # vrai quand c'est la régulation (et non l'utilisateur) qui bouge un curseur
     type: bool
     initial_value: 'false'
@@ -117,7 +121,37 @@ globals:
     restore_value: true
     initial_value: '0'
 
+script:
+  - id: appliquer_moteurs        # recalcule les sorties 0-10 V (après un changement d'antigel)
+    then:
+      - lambda: id(regul_ecrit) = true;
+      - number.set:
+          id: v_souff
+          value: !lambda return id(v_souff).state;
+      - number.set:
+          id: v_extr
+          value: !lambda return id(v_extr).state;
+      - lambda: id(regul_ecrit) = false;
+
 interval:
+  # ---------- Antigel progressif ----------
+  # T rejet sous le seuil -> on baisse le soufflage de 5 % par minute (jusqu'à la baisse maxi)
+  # et on augmente l'extraction. On revient de 5 %/min quand T rejet repasse 2 °C au-dessus.
+  - interval: 1min
+    then:
+      - lambda: |-
+          float tr = id(t_rejet).state;
+          if (isnan(tr)) return;
+          float r = id(antigel_red);
+          if (tr < id(antigel_seuil).state) r += 5;
+          else if (tr > id(antigel_seuil).state + 2.0f) r -= 5;
+          if (r > id(antigel_max).state) r = id(antigel_max).state;
+          if (r < 0) r = 0;
+          if (r != id(antigel_red)) {
+            id(antigel_red) = r;
+            ESP_LOGW("antigel", "T rejet %.1f °C -> soufflage -%.0f %%", tr, r);
+            id(appliquer_moteurs).execute();
+          }
   # ---------- Extraction à pression constante (régulateur PI incrémental) ----------
   # Pression trop basse (bouches qui s'ouvrent) -> on accélère ; trop haute -> on ralentit.
   - interval: 5s
@@ -127,7 +161,9 @@ interval:
           if (!m.has_value() || *m != 1) { id(pi_mem_err) = 0; return; }
           float p = id(p_extraction).state;
           if (isnan(p)) return;                                  // capteur absent : on ne touche à rien
-          float err = id(consigne_pression).state - p;            // >0 : pas assez de dépression
+          float c = id(consigne_pression).state;
+          c += 0.5f * id(antigel_red);                              // antigel : + extraction
+          float err = c - p;                                        // >0 : pas assez de dépression
           if (fabsf(err) < 3.0f) err = 0;                         // zone morte ±3 Pa
           float k = id(pi_gain).state;
           float delta = k * err + 4.0f * k * (err - id(pi_mem_err));   // I + P (forme incrémentale)
@@ -166,6 +202,7 @@ interval:
       - lambda: |-
           auto s = id(regul_souff).active_index();
           if (!s.has_value() || *s != 2) return;
+          if (id(antigel_red) > 0) return;                        // pas d'équilibrage pendant l'antigel
           float r = id(rapport_debits).state;
           if (isnan(r)) return;                                   // trop doux dehors : on ne bouge pas
           float e = r - id(rapport_cible).state;                  // >0 : trop d'extraction -> + soufflage
@@ -203,6 +240,34 @@ output:
 
 # Débit estimé : à régler depuis HA (idéalement avec une mesure aux bouches)
 number:
+  - platform: template
+    id: antigel_seuil
+    name: "Antigel – T rejet mini"
+    web_server:
+      sorting_group_id: grp_regul
+      sorting_weight: 7
+    unit_of_measurement: "°C"
+    min_value: -3
+    max_value: 5
+    step: 0.5
+    initial_value: 1
+    restore_value: true
+    optimistic: true
+    entity_category: config
+  - platform: template
+    id: antigel_max
+    name: "Antigel – baisse maxi du soufflage"
+    web_server:
+      sorting_group_id: grp_regul
+      sorting_weight: 8
+    unit_of_measurement: "%"
+    min_value: 10
+    max_value: 60
+    step: 5
+    initial_value: 40
+    restore_value: true
+    optimistic: true
+    entity_category: config
   - platform: template
     id: consigne_pression
     name: "Consigne dépression extraction"
@@ -313,11 +378,13 @@ number:
       - output.set_level:
           id: pwm_souff
           level: !lambda |-
+            float pct = x - id(antigel_red);                 // antigel : soufflage réduit
+            if (pct < 10) pct = 10;
             // Consigne x % -> tension visée sur le fil JAUNE (10 % = 1 V ... 100 % = 10 V)
             const float RPU = ${r_pullup}, RE = ${r_emetteur}, RI = 100000.0f;  // RI = entrée moteur
             const float v_open = 10.0f * RI / (RI + RPU);   // jaune si transistor bloqué (~9,1 V)
             const float r_th = RPU * RI / (RPU + RI);
-            float vy = x / 10.0f;                            // tension jaune visée
+            float vy = pct / 10.0f;                            // tension jaune visée
             if (vy >= v_open) return 1.0f;                   // 100 % : DAC 0 V (sortie inversée)
             float i = (v_open - vy) / r_th;                  // courant à tirer par le transistor
             float vdac = 0.65f + i * RE;                     // tension DAC nécessaire (Vbe ~0,65 V)
@@ -350,11 +417,15 @@ number:
       - output.set_level:
           id: pwm_extr
           level: !lambda |-
+            float pct = x;
+            { auto m = id(regul_extr).active_index();          // antigel en mode Manuel : + extraction
+              if (!m.has_value() || *m == 0) pct = x + 0.5f * id(antigel_red); }
+            if (pct > 100) pct = 100;
             // Consigne x % -> tension visée sur le fil JAUNE (10 % = 1 V ... 100 % = 10 V)
             const float RPU = ${r_pullup}, RE = ${r_emetteur}, RI = 100000.0f;  // RI = entrée moteur
             const float v_open = 10.0f * RI / (RI + RPU);   // jaune si transistor bloqué (~9,1 V)
             const float r_th = RPU * RI / (RPU + RI);
-            float vy = x / 10.0f;                            // tension jaune visée
+            float vy = pct / 10.0f;                            // tension jaune visée
             if (vy >= v_open) return 1.0f;                   // 100 % : DAC 0 V (sortie inversée)
             float i = (v_open - vy) / r_th;                  // courant à tirer par le transistor
             float vdac = 0.65f + i * RE;                     // tension DAC nécessaire (Vbe ~0,65 V)
@@ -435,6 +506,16 @@ select:
     entity_category: config
 
 sensor:
+  - platform: template
+    name: "Antigel – baisse du soufflage"
+    web_server:
+      sorting_group_id: grp_regul
+      sorting_weight: 9
+    icon: mdi:snowflake-melt
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    update_interval: 30s
+    lambda: return id(antigel_red);
   # Au 1er démarrage, relever les adresses dans les logs puis les coller ici.
   # ---------------- Sondes brutes (ordre de détection sur le bus) ----------------
   # Affectation des rôles depuis la page web / HA (section "Sondes") : chauffer une
@@ -778,6 +859,13 @@ sensor:
     restore: true
 
 binary_sensor:
+  - platform: template
+    name: "Antigel actif"
+    device_class: cold
+    web_server:
+      sorting_group_id: grp_alert
+      sorting_weight: 0
+    lambda: return id(antigel_red) > 0;
   - platform: template
     name: "By-pass probablement ouvert"
     web_server:

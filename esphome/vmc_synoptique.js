@@ -28,6 +28,7 @@
     fj: "Filtres \u2013 jours d'utilisation",
     bp: "By-pass (relais)",
     bpm: "By-pass \u2013 mode",
+    ag: "Antigel \u2013 baisse du soufflage",
   };
 
   const slug = (s) =>
@@ -231,6 +232,8 @@
     const al = [];
     const on = (k) => val[k] === true;
     al.push(on("givre") ? ["bad", "\u2744 Risque de givre"] : ["", "\u2744 Givre : normal"]);
+    if (num("ag") !== null && num("ag") > 0)
+      al.push(["bad", "\u2744 Antigel actif : soufflage -" + Math.round(num("ag")) + " %"]);
     al.push(on("froid") ? ["warn", "\ud83c\udf2c Air souffl\u00e9 froid"] : ["", "\ud83c\udf2c Air souffl\u00e9 : normal"]);
     if (bpKnown) {
       const mode = typeof val.bpm === "string" ? val.bpm.toLowerCase() : "?";

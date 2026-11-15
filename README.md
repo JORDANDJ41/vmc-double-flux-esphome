@@ -12,8 +12,9 @@ Supervision et pilotage d'une **VMC double flux** (testé sur **Atlantic Duocosy
 - **Pression du réseau d'extraction**, mesurée par le capteur Huba d'origine (0,5-4,5 V = 0-300 Pa).
 - **Commande des 2 moteurs EC en 0-10 V**, de 10 à 100 %.
 - **Régulation automatique** : extraction **à pression constante** (consigne en Pa, comme la régulation hygro d'origine : quand les bouches s'ouvrent, l'extraction accélère), et soufflage en **suivi de l'extraction** (avec un écart réglable) ou en **équilibrage automatique** sur le rapport des débits.
+- **Antigel progressif** : si T rejet passe sous le seuil (1 °C par défaut), le soufflage baisse de 5 %/min (jusqu'à une baisse maximale réglable) et l'extraction augmente, sans jamais couper le soufflage.
 - **Alertes** : risque de givre de l'échangeur, air soufflé froid, by-pass ouvert, filtres à changer (compteur de jours avec remise à zéro).
-- **By-pass / free-cooling** automatique (version KinCony) : principe 24 °C / 12 °C, avec seuils réglables et modes forcés.
+- **By-pass / free-cooling** automatique (version KinCony) : principe 24 °C / 12 °C, avec seuils réglables, modes forcés et **consigne de pression d'été** dédiée (plus de débit pendant le free-cooling).
 - **Relais de coupure** des moteurs, câblés sur le contact NF pour la sécurité (version KinCony).
 - **Page web autonome** dans l'ESP : un schéma animé de la VMC, et une page de configuration protégée par code.
 - **Cartes Home Assistant** : un schéma « picture-elements » et des tuiles Mushroom.

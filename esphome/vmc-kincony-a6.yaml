@@ -141,6 +141,10 @@ one_wire:
 #  Compteur filtres : heures d'utilisation depuis le dernier changement
 # ---------------------------------------------------------------------
 globals:
+  - id: antigel_red        # réduction du soufflage par l'antigel (%)
+    type: float
+    restore_value: false
+    initial_value: '0'
   - id: regul_ecrit        # vrai quand c'est la régulation (et non l'utilisateur) qui bouge un curseur
     type: bool
     initial_value: 'false'
@@ -153,6 +157,16 @@ globals:
     initial_value: '0'
 
 script:
+  - id: appliquer_moteurs        # recalcule les sorties 0-10 V (après un changement d'antigel)
+    then:
+      - lambda: id(regul_ecrit) = true;
+      - number.set:
+          id: v_souff
+          value: !lambda return id(v_souff).state;
+      - number.set:
+          id: v_extr
+          value: !lambda return id(v_extr).state;
+      - lambda: id(regul_ecrit) = false;
   # Free-cooling (principe Atlantic 24 °C / 12 °C) :
   # ouvre si la maison est trop chaude ET que l'air neuf est plus frais (mais pas trop froid).
   - id: bypass_regul
@@ -184,6 +198,24 @@ script:
           }
 
 interval:
+  # ---------- Antigel progressif ----------
+  # T rejet sous le seuil -> on baisse le soufflage de 5 % par minute (jusqu'à la baisse maxi)
+  # et on augmente l'extraction. On revient de 5 %/min quand T rejet repasse 2 °C au-dessus.
+  - interval: 1min
+    then:
+      - lambda: |-
+          float tr = id(t_rejet).state;
+          if (isnan(tr)) return;
+          float r = id(antigel_red);
+          if (tr < id(antigel_seuil).state) r += 5;
+          else if (tr > id(antigel_seuil).state + 2.0f) r -= 5;
+          if (r > id(antigel_max).state) r = id(antigel_max).state;
+          if (r < 0) r = 0;
+          if (r != id(antigel_red)) {
+            id(antigel_red) = r;
+            ESP_LOGW("antigel", "T rejet %.1f °C -> soufflage -%.0f %%", tr, r);
+            id(appliquer_moteurs).execute();
+          }
   # ---------- Extraction à pression constante (régulateur PI incrémental) ----------
   # Pression trop basse (bouches qui s'ouvrent) -> on accélère ; trop haute -> on ralentit.
   - interval: 5s
@@ -193,7 +225,10 @@ interval:
           if (!m.has_value() || *m != 1) { id(pi_mem_err) = 0; return; }
           float p = id(p_extraction).state;
           if (isnan(p)) return;                                  // capteur absent : on ne touche à rien
-          float err = id(consigne_pression).state - p;            // >0 : pas assez de dépression
+          float c = id(consigne_pression).state;
+          if (id(relais_bypass).state) c = id(fc_consigne).state;          // free-cooling (été)
+          c += 0.5f * id(antigel_red);                              // antigel : + extraction
+          float err = c - p;                                        // >0 : pas assez de dépression
           if (fabsf(err) < 3.0f) err = 0;                         // zone morte ±3 Pa
           float k = id(pi_gain).state;
           float delta = k * err + 4.0f * k * (err - id(pi_mem_err));   // I + P (forme incrémentale)
@@ -232,6 +267,7 @@ interval:
       - lambda: |-
           auto s = id(regul_souff).active_index();
           if (!s.has_value() || *s != 2) return;
+          if (id(antigel_red) > 0) return;                        // pas d'équilibrage pendant l'antigel
           float r = id(rapport_debits).state;
           if (isnan(r)) return;                                   // trop doux dehors : on ne bouge pas
           float e = r - id(rapport_cible).state;                  // >0 : trop d'extraction -> + soufflage
@@ -311,6 +347,48 @@ switch:
       inverted: true
 
 number:
+  - platform: template
+    id: antigel_seuil
+    name: "Antigel – T rejet mini"
+    web_server:
+      sorting_group_id: grp_regul
+      sorting_weight: 7
+    unit_of_measurement: "°C"
+    min_value: -3
+    max_value: 5
+    step: 0.5
+    initial_value: 1
+    restore_value: true
+    optimistic: true
+    entity_category: config
+  - platform: template
+    id: antigel_max
+    name: "Antigel – baisse maxi du soufflage"
+    web_server:
+      sorting_group_id: grp_regul
+      sorting_weight: 8
+    unit_of_measurement: "%"
+    min_value: 10
+    max_value: 60
+    step: 5
+    initial_value: 40
+    restore_value: true
+    optimistic: true
+    entity_category: config
+  - platform: template
+    id: fc_consigne
+    name: "Consigne dépression free-cooling (été)"
+    web_server:
+      sorting_group_id: grp_bypass
+      sorting_weight: 6
+    unit_of_measurement: "Pa"
+    min_value: 40
+    max_value: 280
+    step: 5
+    initial_value: 160
+    restore_value: true
+    optimistic: true
+    entity_category: config
   - platform: template
     id: consigne_pression
     name: "Consigne dépression extraction"
@@ -465,7 +543,9 @@ number:
       - output.set_level:
           id: dac_souff
           level: !lambda |-
-            float l = x / 100.0f * ${dac_echelle};
+            float pct = x - id(antigel_red);                 // antigel : soufflage réduit
+            if (pct < 10) pct = 10;
+            float l = pct / 100.0f * ${dac_echelle};
             return l > 1.0f ? 1.0f : l;
 
   - platform: template
@@ -493,7 +573,11 @@ number:
       - output.set_level:
           id: dac_extr
           level: !lambda |-
-            float l = x / 100.0f * ${dac_echelle};
+            float pct = x;
+            { auto m = id(regul_extr).active_index();          // antigel en mode Manuel : + extraction
+              if (!m.has_value() || *m == 0) pct = x + 0.5f * id(antigel_red); }
+            if (pct > 100) pct = 100;
+            float l = pct / 100.0f * ${dac_echelle};
             return l > 1.0f ? 1.0f : l;
 
 select:
@@ -583,6 +667,16 @@ select:
     entity_category: config
 
 sensor:
+  - platform: template
+    name: "Antigel – baisse du soufflage"
+    web_server:
+      sorting_group_id: grp_regul
+      sorting_weight: 9
+    icon: mdi:snowflake-melt
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    update_interval: 30s
+    lambda: return id(antigel_red);
   # ---------------- Sondes brutes (ordre de détection sur le bus) ----------------
   # Affectation des rôles depuis la page web / HA (section "Sondes") : chauffer une
   # sonde entre les doigts, repérer laquelle monte, et choisir le bon rôle.
@@ -924,6 +1018,13 @@ sensor:
     restore: true
 
 binary_sensor:
+  - platform: template
+    name: "Antigel actif"
+    device_class: cold
+    web_server:
+      sorting_group_id: grp_alert
+      sorting_weight: 0
+    lambda: return id(antigel_red) > 0;
   - platform: template
     name: "By-pass probablement ouvert"
     web_server:
