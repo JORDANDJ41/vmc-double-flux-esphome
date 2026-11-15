@@ -195,7 +195,7 @@ En mode Automatique, le by-pass s'ouvre si **les trois conditions** sont réunie
 | PAC air/eau | environ 3 | prix de l'électricité |
 | Poêle à granulés | 0,9 (rendement du poêle) | prix du kWh de granulés (environ 0,08 €) |
 
-Avec plusieurs chauffages, prendre une valeur intermédiaire selon celui qui chauffe le plus. Le prix est fixe : avec un tarif comme Tempo, mettre une moyenne d'hiver (environ 0,17 €/kWh en 2026).
+Avec plusieurs chauffages, prendre une valeur intermédiaire selon celui qui chauffe le plus. Valeur par défaut : 0,21 €/kWh, une moyenne pour le tarif Base en 2026. Le prix est fixe : avec un tarif comme Tempo, mettre plutôt une moyenne d'hiver (environ 0,17 €/kWh en 2026).
 
 ### 7.7 Filtres
 
