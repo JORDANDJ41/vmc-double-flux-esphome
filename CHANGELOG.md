@@ -1,5 +1,10 @@
 # Historique des versions
 
+## v1.2.1 (15/11/2026) : corrections
+
+- Sans étalonnage, le **« Débit estimé »** correspond maintenant au débit de soufflage **à 100 %** et suit la vitesse réellement envoyée (mode nuit et antigel compris). Avant, il restait fixe, ce qui surestimait la puissance et l'énergie récupérées à vitesse réduite.
+- Synoptique : « Équilibre débits » affiche « calcul… » pendant la première minute après un démarrage, et « (doux) » seulement quand l'écart reprise − extérieur est inférieur à 6 °C.
+
 ## v1.2.0 (15/11/2026) : étalonnage des débits
 
 - Nouvelle section **« Étalonnage des débits »** : **4 points (25/50/75/100 %)** pour le soufflage et pour l'extraction. Seuls les points saisis sont utilisés, avec une interpolation linéaire entre eux.

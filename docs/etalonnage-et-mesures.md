@@ -51,6 +51,6 @@ Section **« Étalonnage des débits »** (page web → Configurer, ou Home Assi
 
 - On peut ne remplir **que certains points**. Seuls les points non nuls sont utilisés, avec 1 à 4 points.
 - Entre deux points : **interpolation linéaire**. En dehors : proportionnel à la vitesse (loi des ventilateurs) à partir du point le plus proche.
-- **Aucun point saisi** : le soufflage reprend le « Débit estimé » manuel, et l'extraction est estimée par soufflage × rapport des débits.
+- **Aucun point saisi** : le soufflage reprend le « Débit estimé » manuel (débit à 100 %), proportionnellement à la vitesse envoyée, et l'extraction est estimée par soufflage × rapport des débits.
 - Les capteurs **Débit soufflage** et **Débit extraction** (m³/h) sont affichés sous les ventilateurs (page web et carte Home Assistant).
 - La **puissance et l'énergie récupérées** utilisent le débit de soufflage étalonné. Le débit de soufflage tient compte de l'antigel.

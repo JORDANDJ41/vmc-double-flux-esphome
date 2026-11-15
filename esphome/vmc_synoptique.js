@@ -213,7 +213,8 @@
     set("v-en", num("en") === null ? "-- kWh" : (num("en") / 1000).toFixed(2) + " kWh");
     set("v-pres", num("pres") === null ? "-- Pa" : Math.round(num("pres")) + " Pa");
     const r = num("ratio");
-    set("v-ratio", r === null ? "-- (doux)" :
+    const dT = (num("trep") !== null && num("text") !== null) ? num("trep") - num("text") : null;
+    set("v-ratio", r === null ? (dT !== null && dT < 6 ? "-- (doux)" : "calcul\u2026") :
       r.toFixed(2) + (r <= 1.1 ? " \u00e9quilibr\u00e9" : r <= 1.3 ? " d\u00e9pression" : " forte d\u00e9pr."));
     spin("s", num("vs")); spin("e", num("ve"));
 

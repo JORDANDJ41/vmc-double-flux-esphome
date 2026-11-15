@@ -809,9 +809,9 @@ sensor:
       const float Q[4] = {id(etal_qs25).state, id(etal_qs50).state, id(etal_qs75).state, id(etal_qs100).state};
       float px[4], qy[4]; int n = 0;
       for (int k = 0; k < 4; k++) if (!isnan(Q[k]) && Q[k] > 0) { px[n] = P[k]; qy[n] = Q[k]; n++; }
-      if (n == 0) return id(debit).state;   // rien de saisi : débit estimé manuel
       float pct = id(v_souff).state - id(antigel_red)   /* vitesse réellement envoyée */;
       if (pct < 10) pct = 10; if (pct > 100) pct = 100;
+      if (n == 0) return id(debit).state * pct / 100.0f;   // rien de saisi : débit estimé (= débit à 100 %) × vitesse
       if (pct <= px[0]) return qy[0] * pct / px[0];
       if (pct >= px[n-1]) return qy[n-1] * pct / px[n-1];
       for (int k = 0; k < n - 1; k++)

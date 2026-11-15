@@ -181,7 +181,7 @@ En mode Automatique, le by-pass s'ouvre si **les trois conditions** sont réunie
 
 | Capteur | Calcul |
 |---|---|
-| Débit soufflage | courbe d'étalonnage selon la vitesse réellement envoyée (antigel compris), sinon « Débit estimé » |
+| Débit soufflage | courbe d'étalonnage selon la vitesse réellement envoyée (antigel compris), sinon « Débit estimé » (débit à 100 %) × vitesse |
 | Débit extraction | courbe d'étalonnage, sinon soufflage × rapport des débits |
 | Puissance récupérée | 0,34 × débit soufflage × (T insufflation − T air neuf) |
 
