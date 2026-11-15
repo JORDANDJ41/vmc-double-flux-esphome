@@ -24,12 +24,14 @@ esphome:
     priority: -100
     then:
       - component.update: filtre_jours
+      - lambda: id(regul_ecrit) = true;
       - number.set:
           id: v_souff
           value: !lambda return id(v_souff).state;
       - number.set:
           id: v_extr
           value: !lambda return id(v_extr).state;
+      - lambda: id(regul_ecrit) = false;
 
 esp32:
   variant: esp32
@@ -104,6 +106,9 @@ one_wire:
 #  (enregistré en mémoire flash une fois par heure, conservé au redémarrage)
 # ---------------------------------------------------------------------
 globals:
+  - id: regul_ecrit        # vrai quand c'est la régulation (et non l'utilisateur) qui bouge un curseur
+    type: bool
+    initial_value: 'false'
   - id: pi_mem_err
     type: float
     initial_value: '0'
@@ -131,14 +136,14 @@ interval:
           float v = id(v_extr).state + delta;
           if (v < 10) v = 10; if (v > 100) v = 100;
           if (fabsf(v - id(v_extr).state) >= 0.5f)
-            id(v_extr).make_call().set_value(roundf(v)).perform();
+            { id(regul_ecrit) = true; id(v_extr).make_call().set_value(roundf(v)).perform(); id(regul_ecrit) = false; }
           // soufflage en "Suivi extraction"
           auto s = id(regul_souff).active_index();
           if (s.has_value() && *s == 1) {
             float vs = roundf(v + id(suivi_ecart).state);
             if (vs < 10) vs = 10; if (vs > 100) vs = 100;
             if (fabsf(vs - id(v_souff).state) >= 1.0f)
-              id(v_souff).make_call().set_value(vs).perform();
+              { id(regul_ecrit) = true; id(v_souff).make_call().set_value(vs).perform(); id(regul_ecrit) = false; }
           }
 
   # ---------- Soufflage : suivi de l'extraction quand celle-ci est en manuel ----------
@@ -152,7 +157,7 @@ interval:
           float vs = roundf(id(v_extr).state + id(suivi_ecart).state);
           if (vs < 10) vs = 10; if (vs > 100) vs = 100;
           if (fabsf(vs - id(v_souff).state) >= 1.0f)
-            id(v_souff).make_call().set_value(vs).perform();
+            { id(regul_ecrit) = true; id(v_souff).make_call().set_value(vs).perform(); id(regul_ecrit) = false; }
 
   # ---------- Soufflage : équilibrage lent sur le rapport des débits (thermique) ----------
   # Lent volontairement : les températures mettent 30-60 min à se stabiliser.
@@ -168,7 +173,7 @@ interval:
           float step = e > 0 ? 3.0f : -3.0f;
           float vs = id(v_souff).state + step;
           if (vs < 10) vs = 10; if (vs > 100) vs = 100;
-          id(v_souff).make_call().set_value(vs).perform();
+          { id(regul_ecrit) = true; id(v_souff).make_call().set_value(vs).perform(); id(regul_ecrit) = false; }
           ESP_LOGI("regul", "Equilibrage : rapport %.2f -> soufflage %.0f %%", r, vs);
   - interval: 1h
     then:
@@ -298,6 +303,13 @@ number:
     restore_value: true
     optimistic: true
     set_action:
+      - lambda: |-
+          // curseur bougé à la main pendant une régulation auto -> passage en Manuel (et il y reste)
+          if (!id(regul_ecrit)) {
+            auto m = id(regul_souff).active_index();
+            if (m.has_value() && *m != 0)
+              id(regul_souff).make_call().set_option("Manuel").perform();
+          }
       - output.set_level:
           id: pwm_souff
           level: !lambda |-
@@ -328,6 +340,13 @@ number:
     restore_value: true
     optimistic: true
     set_action:
+      - lambda: |-
+          // curseur bougé à la main pendant une régulation auto -> passage en Manuel (et il y reste)
+          if (!id(regul_ecrit)) {
+            auto m = id(regul_extr).active_index();
+            if (m.has_value() && *m != 0)
+              id(regul_extr).make_call().set_option("Manuel").perform();
+          }
       - output.set_level:
           id: pwm_extr
           level: !lambda |-
