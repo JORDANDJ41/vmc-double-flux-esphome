@@ -1,5 +1,9 @@
 # Historique des versions
 
+## v1.3.1 (15/11/2026) : économie calculée sur l'énergie
+
+- « Économie estimée » est maintenant calculée directement à partir de l'**énergie récupérée** : énergie ÷ COP × prix du kWh. Elle tient compte de toute l'énergie déjà récupérée, se recalcule si le prix ou le COP change, et suit la remise à zéro de l'énergie.
+
 ## v1.3.0 (15/11/2026) : économie en euros
 
 - Deux nouveaux réglages : **« Prix du kWh électrique »** (0,17 €/kWh par défaut) et **« COP du chauffage remplacé »** (1 pour des radiateurs électriques, 3 à 4 pour une clim ou une PAC).
