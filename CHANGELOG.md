@@ -11,7 +11,6 @@
 - Carte Home Assistant (tuiles) : sélecteur de mode, et curseurs des deux ventilateurs affichés **seulement en mode Manuel** (carte conditionnelle).
 - Page web de l'ESP : **boutons de mode** sous le schéma, utilisables sans code. Les curseurs des ventilateurs restent dans ⚙ Configurer (code requis).
 - **Réglages épurés** : l'antigel (seuil 1 °C, baisse maxi 40 %), la durée des filtres (365 jours, un changement par an) et la réactivité de la régulation (0,05 %/Pa) sont fixés dans le programme (substitutions en haut du YAML) et ne sont plus modifiables depuis Home Assistant. Le bouton « Filtres changés » reste.
-- Au premier démarrage, le mode est **Manuel** (mise en service), puis il est mémorisé.
 - Supprimés : « By-pass probablement ouvert » (le by-pass est piloté, la carte affiche l'état du relais) et « Économie moyenne par jour ».
 
 ## v1.4.1 (16/11/2026) : correction

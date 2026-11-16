@@ -699,7 +699,7 @@ select:
       sorting_weight: 1
     icon: mdi:fan-auto
     options: ["Manuel", "Éco", "Confort", "Boost"]
-    initial_option: "Manuel"     # démarrage en Manuel : on passe en Éco/Confort/Boost une fois la mise en service faite
+    initial_option: "Confort"
     restore_value: true
     optimistic: true
 
