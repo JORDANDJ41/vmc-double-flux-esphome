@@ -84,6 +84,7 @@
     <text y="-4" fill="#c9d1e0" font-size="12" text-anchor="middle">\u00e9changeur</text>
     <text id="v-eta" y="16" fill="#7ee08a" font-size="18" font-weight="700" text-anchor="middle">-- %</text>
   </g>
+  <text id="v-mode" x="380" y="318" fill="#c9d1e0" font-size="13" font-weight="600" text-anchor="middle"></text>
 
   <!-- gaines c\u00f4t\u00e9 ext\u00e9rieur -->
   <g style="color:#8ab4f8">
@@ -231,6 +232,7 @@
     set("v-vs", (num("vs") === null ? "-- %" : Math.round(num("vs")) + " %") + (num("qs") === null ? "" : " \u00b7 " + Math.round(num("qs")) + " m\u00b3/h"));
     set("v-ve", (num("ve") === null ? "-- %" : Math.round(num("ve")) + " %") + (num("qe") === null ? "" : " \u00b7 " + Math.round(num("qe")) + " m\u00b3/h"));
     set("v-eta", num("eta") === null ? "-- %" : Math.round(num("eta")) + " %");
+    set("v-mode", typeof val.mode === "string" ? "Mode : " + val.mode : "");
     set("v-pw", num("pw") === null ? "-- W" : Math.round(num("pw")) + " W");
     set("v-en", (num("en") === null ? "-- kWh" : (num("en") / 1000).toFixed(2) + " kWh") +
       (num("eco") === null ? "" : " \u00b7 " + num("eco").toFixed(2).replace(".", ",") + " \u20ac"));

@@ -9,7 +9,7 @@
 - Nouvelle automatisation [`vmc-mode-nuit.yaml`](homeassistant/automations/vmc-mode-nuit.yaml) : Éco de 22 h à 8 h, Confort le jour, sans toucher à un Boost ou un Manuel choisi à la main. Elle remplace `vmc-soufflage-nuit.yaml` (supprimée).
 - By-pass ouvert : la consigne free-cooling ne s'applique que si elle est plus élevée que celle du mode (un Boost reste un Boost).
 - `ota:` : ajout de `encryption:` (chiffrement des mises à jour sans fil), comme le propose ESPHome Builder : la question ne revient plus à chaque installation.
-- Carte schéma : **mode de ventilation** affiché sous l'échangeur ; la consigne est masquée en Manuel.
+- Carte schéma et page web de l'ESP : **mode de ventilation** affiché sous l'échangeur ; la consigne est masquée en Manuel.
 - Carte schéma en pleine largeur (`grid_options: columns: 24`) pour que la consigne ne chevauche pas la pression.
 - Notice : installation des cartes Home Assistant détaillée pas à pas (images, Mushroom, ajout et mise à jour d'une carte).
 - Carte Home Assistant (tuiles) : sélecteur de mode, et curseurs des deux ventilateurs affichés **seulement en mode Manuel** (carte conditionnelle).
