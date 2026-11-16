@@ -1,6 +1,6 @@
 # Historique des versions
 
-## Prochaine version (v1.5.0, non testée) : modes Manuel / Éco / Confort / Boost
+## v1.5.0 (17/11/2026) : modes Manuel / Éco / Confort / Boost
 
 - Un seul sélecteur **« Mode de ventilation »** remplace « Régulation extraction » et « Régulation soufflage » :
   - **Manuel** : les deux vitesses (soufflage et extraction) se règlent à la main ;
