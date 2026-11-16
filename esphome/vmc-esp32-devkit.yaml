@@ -12,6 +12,11 @@
 # =====================================================================
 
 substitutions:
+  # Réglages fixes (non modifiables depuis Home Assistant)
+  antigel_seuil: "1.0"     # antigel : T rejet mini (°C)
+  antigel_max: "40.0"      # antigel : baisse maxi du soufflage (%)
+  filtre_seuil: "180"      # filtres : durée avant changement (jours)
+  pi_gain: "0.05"          # régulation pression : réactivité (%/Pa)
   delta_min: "6.0"        # écart T_rep - T_ext mini pour un rendement exploitable (°C)
   # Étage moteur : résistance WAGO rouge->jaune (côté moteur) et résistance d'émetteur (platine)
   r_pullup: "9100.0"
@@ -162,9 +167,9 @@ interval:
           float tr = id(t_rejet).state;
           if (isnan(tr)) return;
           float r = id(antigel_red);
-          if (tr < id(antigel_seuil).state) r += 5;
-          else if (tr > id(antigel_seuil).state + 2.0f) r -= 5;
-          if (r > id(antigel_max).state) r = id(antigel_max).state;
+          if (tr < ${antigel_seuil}) r += 5;
+          else if (tr > ${antigel_seuil} + 2.0f) r -= 5;
+          if (r > ${antigel_max}) r = ${antigel_max};
           if (r < 0) r = 0;
           if (r != id(antigel_red)) {
             id(antigel_red) = r;
@@ -186,7 +191,7 @@ interval:
           c += 0.5f * id(antigel_red);                              // antigel : + extraction
           float err = c - p;                                        // >0 : pas assez de dépression
           if (fabsf(err) < 3.0f) err = 0;                         // zone morte ±3 Pa
-          float k = id(pi_gain).state;
+          float k = ${pi_gain};
           float delta = k * err + 4.0f * k * (err - id(pi_mem_err));   // I + P (forme incrémentale)
           id(pi_mem_err) = err;
           if (delta > 3.0f) delta = 3.0f; if (delta < -3.0f) delta = -3.0f;   // 3 %/5 s maxi
@@ -361,34 +366,6 @@ number:
     restore_value: true
     optimistic: true
     entity_category: config
-  - platform: template
-    id: antigel_seuil
-    name: "Antigel – T rejet mini"
-    web_server:
-      sorting_group_id: grp_regul
-      sorting_weight: 7
-    unit_of_measurement: "°C"
-    min_value: -3
-    max_value: 5
-    step: 0.5
-    initial_value: 1
-    restore_value: true
-    optimistic: true
-    entity_category: config
-  - platform: template
-    id: antigel_max
-    name: "Antigel – baisse maxi du soufflage"
-    web_server:
-      sorting_group_id: grp_regul
-      sorting_weight: 8
-    unit_of_measurement: "%"
-    min_value: 10
-    max_value: 60
-    step: 5
-    initial_value: 40
-    restore_value: true
-    optimistic: true
-    entity_category: config
   # Consignes de dépression par mode (mesurées au caisson, capteur Huba).
   # Bouches hygro B : 80-160 Pa à la bouche ; les gaines font perdre quelques Pa.
   - platform: template
@@ -430,20 +407,6 @@ number:
     max_value: 280
     step: 5
     initial_value: 170
-    restore_value: true
-    optimistic: true
-    entity_category: config
-  - platform: template
-    id: pi_gain
-    name: "Régulation pression – réactivité"
-    web_server:
-      sorting_group_id: grp_regul
-      sorting_weight: 3
-    unit_of_measurement: "%/Pa"
-    min_value: 0.01
-    max_value: 0.5
-    step: 0.01
-    initial_value: 0.05
     restore_value: true
     optimistic: true
     entity_category: config
@@ -505,21 +468,6 @@ number:
     max_value: 6
     step: 0.1
     initial_value: 3.5
-    restore_value: true
-    optimistic: true
-    entity_category: config
-
-  - platform: template
-    id: filtre_seuil
-    name: "Filtres – seuil de changement"
-    web_server:
-      sorting_group_id: grp_reglages
-      sorting_weight: 2
-    unit_of_measurement: "j"
-    min_value: 30
-    max_value: 400
-    step: 15
-    initial_value: 180
     restore_value: true
     optimistic: true
     entity_category: config
@@ -1104,26 +1052,6 @@ sensor:
       if (isnan(e) || isnan(cop) || cop < 1 || isnan(prix)) return NAN;
       return e / 1000.0f / cop * prix;      // e_recup est en Wh
 
-  # Économie ramenée au nombre de jours depuis la dernière remise à zéro datée
-  - platform: template
-    name: "Économie moyenne par jour"
-    web_server:
-      sorting_group_id: grp_perf
-      sorting_weight: 8.6
-    icon: mdi:cash-clock
-    unit_of_measurement: "€/j"
-    accuracy_decimals: 2
-    update_interval: 10min
-    lambda: |-
-      if (id(energie_depuis) == 0) return NAN;
-      auto t = id(horloge).now();
-      if (!t.is_valid()) t = id(horloge_sntp).now();
-      if (!t.is_valid()) return NAN;
-      float j = (float) ((int64_t) t.timestamp - (int64_t) id(energie_depuis)) / 86400.0f;
-      if (j < 0.25f) return NAN;            // moins de 6 h : pas encore significatif
-      float e = id(eco_euros).state;
-      return isnan(e) ? NAN : e / j;
-
 binary_sensor:
   - platform: template
     name: "Antigel actif"
@@ -1132,18 +1060,6 @@ binary_sensor:
       sorting_group_id: grp_alert
       sorting_weight: 0
     lambda: return id(antigel_red) > 0;
-  - platform: template
-    name: "By-pass probablement ouvert"
-    web_server:
-      sorting_group_id: grp_alert
-      sorting_weight: 3
-    lambda: |-
-      float d = id(t_rep).state - id(t_ext).state;
-      if (isnan(d) || d < ${delta_min}) return false;
-      return id(eta_souff).state < 30.0f;
-    filters:
-      - delayed_on: 10min
-
   - platform: template
     name: "Risque givrage échangeur"
     web_server:
@@ -1175,7 +1091,7 @@ binary_sensor:
     device_class: problem
     icon: mdi:air-filter
     lambda: |-
-      return (id(filtre_heures) / 24.0f) >= id(filtre_seuil).state;
+      return (id(filtre_heures) / 24.0f) >= ${filtre_seuil};
 
 text_sensor:
   # Aide affichée sous les réglages d'économie (page web de l'ESP et Home Assistant)

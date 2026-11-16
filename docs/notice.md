@@ -147,7 +147,6 @@ Adresse : `http://<IP-de-l-ESP>` ou `http://vmc.local`. Elle fonctionne **sans H
 | Consigne dépression – Éco (nuit) | 90 Pa | moins de bruit et de consommation la nuit |
 | Consigne dépression – Confort | 125 Pa | régime normal de jour |
 | Consigne dépression – Boost | 170 Pa | coup de ventilation (odeurs, séchage, soirée d'été) |
-| Régulation pression – réactivité | 0,05 %/Pa | à augmenter si la régulation est trop lente, à diminuer si elle oscille |
 | Soufflage – écart / extraction | −5 % | soufflage = extraction + écart, dans tous les modes (négatif = légère dépression, positif = légère surpression) |
 
 - **Modes de ventilation** : les consignes sont mesurées au caisson (capteur de pression). Les gaines font perdre quelques Pa jusqu'aux bouches. Des bouches hygro B fonctionnent entre 80 et 160 Pa : vérifiez au manomètre si possible, la bouche la plus proche en Boost et la plus éloignée en Éco. Le changement de mode se fait à la main ou par un planning Home Assistant (automatisation fournie, voir §8). Si le by-pass est ouvert, la consigne free-cooling s'applique quand elle est plus élevée.
@@ -156,14 +155,11 @@ Adresse : `http://<IP-de-l-ESP>` ou `http://vmc.local`. Elle fonctionne **sans H
 
 ### 7.4 Antigel
 
-| Réglage | Défaut | Rôle |
-|---|---|---|
-| Antigel – T rejet mini | 1 °C | seuil de déclenchement |
-| Antigel – baisse maxi du soufflage | 40 % | limite pour ne pas mettre la maison en forte dépression |
+Réglages fixes, inscrits dans le programme (non modifiables depuis Home Assistant) : déclenchement si la **T rejet passe sous 1 °C**, baisse maximale du soufflage de **40 %** (pour ne pas mettre la maison en forte dépression). Pour les changer, modifier `antigel_seuil` et `antigel_max` en haut du YAML et réinstaller.
 
 Sous le seuil, le soufflage baisse de **5 % par minute** et l'extraction augmente (+0,5 Pa par % en pression constante, ou +½ de la baisse en manuel). Au-dessus du seuil + 2 °C, le retour se fait de 5 % par minute. **Le soufflage n'est jamais coupé.** Les curseurs ne sont pas modifiés : seule la commande réelle des moteurs est corrigée.
 
-**Test** : régler le seuil au-dessus de la T rejet actuelle, vérifier que « Antigel – baisse du soufflage » monte, puis remettre 1 °C.
+**Test** : mettre provisoirement `antigel_seuil` au-dessus de la T rejet actuelle, réinstaller, vérifier que « Antigel – baisse du soufflage » monte, puis remettre 1.0.
 
 ### 7.5 By-pass / free-cooling
 
@@ -197,7 +193,7 @@ En mode Automatique, le by-pass s'ouvre si **les trois conditions** sont réunie
 | PAC air/eau | environ 3 | prix de l'électricité |
 | Poêle à granulés | 0,9 (rendement du poêle) | prix du kWh de granulés (environ 0,08 €) |
 
-Avec plusieurs chauffages, prendre une valeur intermédiaire selon celui qui chauffe le plus. Le bouton « Remise à zéro énergie récupérée » enregistre la date (capteur « Énergie récupérée – comptée depuis le »), ce qui permet de calculer « Économie moyenne par jour ». Le bouton « Filtres changés » enregistre aussi sa date.
+Avec plusieurs chauffages, prendre une valeur intermédiaire selon celui qui chauffe le plus. Le bouton « Remise à zéro énergie récupérée » enregistre la date (capteur « Énergie récupérée – comptée depuis le »). Le bouton « Filtres changés » enregistre aussi sa date.
 
 Valeur par défaut : 0,21 €/kWh, une moyenne pour le tarif Base en 2026. Le prix est fixe : avec un tarif comme Tempo, mettre plutôt une moyenne d'hiver (environ 0,17 €/kWh en 2026).
 
@@ -205,9 +201,10 @@ Valeur par défaut : 0,21 €/kWh, une moyenne pour le tarif Base en 2026. Le pr
 
 | Réglage | Rôle |
 |---|---|
-| Filtres – seuil de changement | durée avant alerte (180 j par défaut) |
 | Filtres – jours d'utilisation | compteur |
 | Filtres changés (remise à zéro) | à presser après le remplacement |
+
+Durée fixe de **180 jours** avant l'alerte « Filtres à changer » (réglage `filtre_seuil` en haut du YAML).
 
 ### 7.8 Indicateurs
 
@@ -219,7 +216,6 @@ Valeur par défaut : 0,21 €/kWh, une moyenne pour le tarif Base en 2026. Le pr
 | Pression réseau extraction | dépression du réseau (capteur Huba) |
 | Air soufflé froid | T insufflation inférieure à 15 °C pendant 10 min |
 | Risque givrage échangeur | T rejet inférieure à 1 °C pendant 5 min |
-| By-pass probablement ouvert | rendement soufflage inférieur à 30 % pendant 10 min |
 
 Les rendements et le rapport des débits ne sont calculés que si l'écart reprise/extérieur est d'au moins 6 °C. Par temps doux, ils restent vides.
 
@@ -263,7 +259,7 @@ Automatisations fournies :
 | Le moteur reste à fond quoi qu'il arrive | entrée 0-10 V du moteur HS (+10 V rouge/bleu hors tolérance) | réparation ou échange du moteur |
 | Reprise trop froide | dépression forte, fuites dans les combles, siphon vide, gaines mal isolées | voir [`retour-d-experience.md`](retour-d-experience.md) |
 | Rendements et rapport vides | temps doux (écart inférieur à 6 °C) | normal |
-| La régulation oscille | réactivité trop forte | baisser « Régulation pression – réactivité » |
+| La régulation oscille | réactivité trop forte | baisser `pi_gain` en haut du YAML (0,05 %/Pa par défaut) et réinstaller |
 
 ---
 

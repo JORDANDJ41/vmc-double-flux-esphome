@@ -122,11 +122,11 @@ cards:
       - type: custom:mushroom-template-card
         primary: By-pass
         secondary: >-
-          {{ 'Ouvert ?' if is_state('binary_sensor.vmc_by_pass_probablement_ouvert', 'on') else 'Fermé' }}
+          {{ 'Ouvert' if is_state('switch.vmc_by_pass_relais', 'on') else 'Fermé' }}
         icon: mdi:valve
         icon_color: >-
-          {{ 'amber' if is_state('binary_sensor.vmc_by_pass_probablement_ouvert', 'on') else 'grey' }}
-        entity: binary_sensor.vmc_by_pass_probablement_ouvert
+          {{ 'amber' if is_state('switch.vmc_by_pass_relais', 'on') else 'grey' }}
+        entity: switch.vmc_by_pass_relais
       - type: custom:mushroom-template-card
         primary: Givrage échangeur
         secondary: >-
