@@ -21,9 +21,9 @@
     en: "\u00c9nergie r\u00e9cup\u00e9r\u00e9e",
     ratio: "Rapport d\u00e9bits extraction sur soufflage",
     pres: "Pression r\u00e9seau extraction",
+    cons: "Consigne extraction",
     froid: "Air souffl\u00e9 froid",
     givre: "Risque givrage \u00e9changeur",
-    bypass: "By-pass probablement ouvert",
     filtre: "Filtres \u00e0 changer",
     fj: "Filtres \u2013 jours d'utilisation",
     bp: "By-pass (relais)",
@@ -32,6 +32,7 @@
     qs: "D\u00e9bit soufflage",
     qe: "D\u00e9bit extraction",
     eco: "\u00c9conomie estim\u00e9e",
+    mode: "Mode de ventilation",
   };
 
   const slug = (s) =>
@@ -83,6 +84,7 @@
     <text y="-4" fill="#c9d1e0" font-size="12" text-anchor="middle">\u00e9changeur</text>
     <text id="v-eta" y="16" fill="#7ee08a" font-size="18" font-weight="700" text-anchor="middle">-- %</text>
   </g>
+  <text id="v-mode" x="380" y="318" fill="#c9d1e0" font-size="13" font-weight="600" text-anchor="middle"></text>
 
   <!-- gaines c\u00f4t\u00e9 ext\u00e9rieur -->
   <g style="color:#8ab4f8">
@@ -157,7 +159,12 @@
   #vmc-bar{display:flex;justify-content:space-between;align-items:center;margin:6px 4px 0}
   #vmc-cfg{background:#2b6cb0;color:#fff;border:0;border-radius:10px;padding:9px 16px;font-size:14px;cursor:pointer}
   #vmc-cfg.open{background:#4a5568}
-  #vmc-syn small{color:#8a93a6}`;
+  #vmc-syn small{color:#8a93a6}
+  #vmc-mode{display:flex;flex-wrap:wrap;gap:8px;margin:8px 4px;align-items:center}
+  #vmc-mode b{font-size:13px;color:#8a93a6;font-weight:500;margin-right:4px}
+  #vmc-mode button{background:#243042;color:#c9d1e0;border:1px solid #3a4a63;border-radius:999px;padding:6px 14px;font-size:13px;cursor:pointer}
+  #vmc-mode button.on{background:#2b6cb0;border-color:#2b6cb0;color:#fff;font-weight:650}
+  #vmc-mode small{margin-left:4px}`;
 
   function build() {
     if (document.getElementById("vmc-syn")) return;
@@ -165,12 +172,27 @@
     const box = document.createElement("div");
     box.id = "vmc-syn";
     box.innerHTML = `<h1>VMC double flux</h1>${svg}
+      <div id="vmc-mode"><b>Mode</b>${MODES.map(m => `<button data-m="${m}">${m}</button>`).join("")}<small id="vmc-mode-info"></small></div>
       <div id="vmc-alerts"></div>
       <div id="vmc-bar"><small id="vmc-maj">connexion\u2026</small>
         <button id="vmc-cfg">\u2699 Configurer</button></div>`;
     document.body.insertBefore(box, document.body.firstChild);
     hideConfig(true);
     document.getElementById("vmc-cfg").onclick = toggleConfig;
+    box.querySelectorAll("#vmc-mode button").forEach(b => b.onclick = () => setMode(b.dataset.m));
+  }
+
+  // --- Mode de ventilation : seul r\u00e9glage accessible sans code ---
+  // Les curseurs des ventilateurs restent dans la configuration (code requis).
+  const MODES = ["Manuel", "\u00c9co", "Confort", "Boost"];
+  async function setMode(opt) {
+    const q = "/set?option=" + encodeURIComponent(opt);
+    try {
+      let r = await fetch("/select/" + encodeURIComponent(N.mode) + q, { method: "POST" });   // ESPHome r\u00e9cent (par nom)
+      if (!r.ok) r = await fetch("/select/" + slug(N.mode) + q, { method: "POST" });           // ancien format (object_id)
+      if (!r.ok) throw new Error(r.status);
+      val.mode = opt; render();
+    } catch (e) { alert("Changement de mode impossible (" + e.message + ")"); }
   }
 
   // --- page standard ESPHome (liste des entit\u00e9s) masqu\u00e9e par d\u00e9faut ---
@@ -210,10 +232,12 @@
     set("v-vs", (num("vs") === null ? "-- %" : Math.round(num("vs")) + " %") + (num("qs") === null ? "" : " \u00b7 " + Math.round(num("qs")) + " m\u00b3/h"));
     set("v-ve", (num("ve") === null ? "-- %" : Math.round(num("ve")) + " %") + (num("qe") === null ? "" : " \u00b7 " + Math.round(num("qe")) + " m\u00b3/h"));
     set("v-eta", num("eta") === null ? "-- %" : Math.round(num("eta")) + " %");
+    set("v-mode", typeof val.mode === "string" ? val.mode : "");
     set("v-pw", num("pw") === null ? "-- W" : Math.round(num("pw")) + " W");
     set("v-en", (num("en") === null ? "-- kWh" : (num("en") / 1000).toFixed(2) + " kWh") +
       (num("eco") === null ? "" : " \u00b7 " + num("eco").toFixed(2).replace(".", ",") + " \u20ac"));
-    set("v-pres", num("pres") === null ? "-- Pa" : Math.round(num("pres")) + " Pa");
+    set("v-pres", (num("pres") === null ? "-- Pa" : Math.round(num("pres")) + " Pa")
+      + (num("cons") === null ? "" : " / consigne " + Math.round(num("cons"))));
     const r = num("ratio");
     const dT = (num("trep") !== null && num("text") !== null) ? num("trep") - num("text") : null;
     set("v-ratio", r === null ? (dT !== null && dT < 6 ? "-- (doux)" : "calcul\u2026") :
@@ -244,9 +268,10 @@
       const mode = typeof val.bpm === "string" ? val.bpm.toLowerCase() : "?";
       al.push(val.bp ? ["warn", "\u2194 By-pass ouvert (" + mode + ")"] : ["", "\u2194 By-pass ferm\u00e9 (" + mode + ")"]);
     }
-    if (on("bypass") && !bpKnown) al.push(["warn", "\u2194 By-pass ouvert ?"]);
     const j = num("fj") === null ? "--" : Math.round(num("fj"));
     al.push(on("filtre") ? ["bad", "\ud83e\uddf9 Filtres \u00e0 changer (" + j + " j)"] : ["", "\ud83e\uddf9 Filtres : " + j + " j"]);
+    document.querySelectorAll("#vmc-mode button").forEach(b => b.classList.toggle("on", b.dataset.m === val.mode));
+    set("vmc-mode-info", val.mode === "Manuel" ? "vitesses r\u00e9glables dans \u2699 Configurer" : "");
     document.getElementById("vmc-alerts").innerHTML =
       al.map(([c, t]) => `<span class="${c}">${t}</span>`).join("");
     set("vmc-maj", "Mis \u00e0 jour " + new Date().toLocaleTimeString("fr-FR"));

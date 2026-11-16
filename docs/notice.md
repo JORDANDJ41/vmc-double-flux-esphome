@@ -110,6 +110,7 @@ Adresse : `http://<IP-de-l-ESP>` ou `http://vmc.local`. Elle fonctionne **sans H
 
 - **Schéma animé** : températures, rendement, ventilateurs (vitesse et débit), by-pass, puissance, énergie, équilibre et pression.
 - **Pastilles d'alerte** : givre, antigel actif, air soufflé froid, by-pass, filtres.
+- **Boutons de mode** (Manuel, Éco, Confort, Boost) : seul réglage accessible sans code. En Manuel, les curseurs des ventilateurs se règlent dans ⚙ Configurer.
 - **⚙ Configurer** : code `admin` par défaut. Modifiable en haut de `vmc_synoptique.js` (`CODE_CONFIG`), puis recompiler.
 
 > Le code ne fait que **masquer** la configuration. Pour une vraie protection (installation chez un client), activez le bloc `auth:` dans `web_server` : le navigateur demandera alors un identifiant et un mot de passe.
@@ -129,39 +130,38 @@ Adresse : `http://<IP-de-l-ESP>` ou `http://vmc.local`. Elle fonctionne **sans H
 
 **Procédure** : pincer une sonde entre les doigts une minute, repérer la « Sonde X » qui monte, et l'affecter au bon rôle. Les choix sont mémorisés. Il n'y a rien à recompiler en cas de remplacement d'une sonde.
 
+Ces réglages n'apparaissent **que sur la page web de l'ESP** (⚙ Configurer, section « Sondes – affectation »), pas dans Home Assistant : ils ne servent qu'à l'installation ou au remplacement d'une sonde.
+
 ### 7.2 Commande des ventilateurs
 
 | Réglage | Rôle |
 |---|---|
-| Vitesse soufflage / extraction (10-100 %) | 10 % = 1 V, 100 % = 10 V sur le fil jaune |
+| Vitesse soufflage / extraction (10-100 %) | 10 % = 1 V, 100 % = 10 V sur le fil jaune. Réglage à la main en mode **Manuel** ; en Éco / Confort / Boost, c'est la régulation qui les pilote |
 | Coupure moteur soufflage / extraction | coupe le 230 V (relais câblés en NF : au repos, le moteur tourne) |
 
-**Bouger un curseur à la main fait passer sa régulation en Manuel**, et elle y reste.
+**Bouger un curseur à la main fait passer le mode de ventilation en Manuel**, et il y reste. Sur la carte Home Assistant fournie, les deux curseurs n'apparaissent qu'en mode Manuel.
 
 ### 7.3 Régulation automatique
 
 | Réglage | Valeur par défaut | Rôle |
 |---|---|---|
-| Régulation extraction | Pression constante | **Manuel** ou **Pression constante** |
-| Consigne dépression extraction | 120 Pa | dépression à maintenir dans le réseau d'extraction |
-| Régulation pression – réactivité | 0,05 %/Pa | à augmenter si la régulation est trop lente, à diminuer si elle oscille |
-| Régulation soufflage | Suivi extraction | **Manuel**, **Suivi extraction** ou **Équilibrage auto** |
-| Soufflage – écart / extraction | −5 % | en Suivi : soufflage = extraction + écart (négatif = légère dépression) |
-| Soufflage – rapport des débits visé | 1,05 | en Équilibrage auto : rapport extraction/soufflage visé |
+| Mode de ventilation | Confort | **Manuel** : les deux vitesses se règlent à la main. **Éco**, **Confort**, **Boost** : extraction à pression constante avec la consigne du mode, et soufflage qui suit l'extraction |
+| Consigne Éco | 90 Pa | moins de bruit et de consommation la nuit |
+| Consigne Confort | 125 Pa | régime normal de jour |
+| Consigne Boost | 170 Pa | coup de ventilation (odeurs, séchage, soirée d'été) |
+| Soufflage – écart / extraction | −5 % | en Éco / Confort / Boost : soufflage = extraction + écart (négatif = légère dépression, positif = légère surpression) |
 
+- **Modes de ventilation** : les consignes sont mesurées au caisson (capteur de pression). Les gaines font perdre quelques Pa jusqu'aux bouches. Des bouches hygro B fonctionnent entre 80 et 160 Pa : vérifiez au manomètre si possible, la bouche la plus proche en Boost et la plus éloignée en Éco. Le changement de mode se fait à la main ou par un planning Home Assistant (automatisation fournie, voir §8). Si le by-pass est ouvert, la consigne free-cooling s'applique quand elle est plus élevée.
 - **Pression constante** : quand les bouches hygro s'ouvrent, la pression baisse et l'extraction accélère. Zone morte ±3 Pa, variation de 3 % maximum toutes les 5 s.
-- **Équilibrage auto** : correction de ±3 % toutes les 10 min, d'après les températures. C'est volontairement lent, à cause de l'inertie thermique. Inactif par temps doux (écart reprise/extérieur inférieur à 6 °C) et pendant l'antigel.
+- **Soufflage** : en Éco / Confort / Boost, il suit l'extraction avec l'écart réglé, ce qui garde la maison équilibrée. Pour corriger un déséquilibre (voir « Rapport débits »), ajustez l'écart. En Manuel, il se règle à la main, indépendamment.
 
 ### 7.4 Antigel
 
-| Réglage | Défaut | Rôle |
-|---|---|---|
-| Antigel – T rejet mini | 1 °C | seuil de déclenchement |
-| Antigel – baisse maxi du soufflage | 40 % | limite pour ne pas mettre la maison en forte dépression |
+Réglages fixes, inscrits dans le programme (non modifiables depuis Home Assistant) : déclenchement si la **T rejet passe sous 1 °C**, baisse maximale du soufflage de **40 %** (pour ne pas mettre la maison en forte dépression). Pour les changer, modifier `antigel_seuil` et `antigel_max` en haut du YAML et réinstaller.
 
 Sous le seuil, le soufflage baisse de **5 % par minute** et l'extraction augmente (+0,5 Pa par % en pression constante, ou +½ de la baisse en manuel). Au-dessus du seuil + 2 °C, le retour se fait de 5 % par minute. **Le soufflage n'est jamais coupé.** Les curseurs ne sont pas modifiés : seule la commande réelle des moteurs est corrigée.
 
-**Test** : régler le seuil au-dessus de la T rejet actuelle, vérifier que « Antigel – baisse du soufflage » monte, puis remettre 1 °C.
+**Test** : mettre provisoirement `antigel_seuil` au-dessus de la T rejet actuelle, réinstaller, vérifier que « Antigel – baisse du soufflage » monte, puis remettre 1.0.
 
 ### 7.5 By-pass / free-cooling
 
@@ -179,6 +179,8 @@ En mode Automatique, le by-pass s'ouvre si **les trois conditions** sont réunie
 
 8 cases : débit mesuré à **25, 50, 75 et 100 %**, pour le soufflage et pour l'extraction. Seules les cases non nulles sont utilisées. Méthodes de mesure : [`etalonnage-et-mesures.md`](etalonnage-et-mesures.md).
 
+Ces 8 cases et le **« Débit estimé »** se règlent **uniquement sur la page web de l'ESP** (⚙ Configurer, sections « Étalonnage des débits » et « Réglages »), pas dans Home Assistant : ce sont des réglages de mise en service. Les débits calculés (soufflage, extraction) restent dans Home Assistant.
+
 | Capteur | Calcul |
 |---|---|
 | Débit soufflage | courbe d'étalonnage selon la vitesse réellement envoyée (antigel compris), sinon « Débit estimé » (débit à 100 %) × vitesse |
@@ -195,7 +197,7 @@ En mode Automatique, le by-pass s'ouvre si **les trois conditions** sont réunie
 | PAC air/eau | environ 3 | prix de l'électricité |
 | Poêle à granulés | 0,9 (rendement du poêle) | prix du kWh de granulés (environ 0,08 €) |
 
-Avec plusieurs chauffages, prendre une valeur intermédiaire selon celui qui chauffe le plus. Le bouton « Remise à zéro énergie récupérée » enregistre la date (capteur « Énergie récupérée – comptée depuis le »), ce qui permet de calculer « Économie moyenne par jour ». Le bouton « Filtres changés » enregistre aussi sa date.
+Avec plusieurs chauffages, prendre une valeur intermédiaire selon celui qui chauffe le plus. Le bouton « Remise à zéro énergie récupérée » enregistre la date (capteur « Énergie récupérée – comptée depuis le »). Le bouton « Filtres changés » enregistre aussi sa date.
 
 Valeur par défaut : 0,21 €/kWh, une moyenne pour le tarif Base en 2026. Le prix est fixe : avec un tarif comme Tempo, mettre plutôt une moyenne d'hiver (environ 0,17 €/kWh en 2026).
 
@@ -203,9 +205,10 @@ Valeur par défaut : 0,21 €/kWh, une moyenne pour le tarif Base en 2026. Le pr
 
 | Réglage | Rôle |
 |---|---|
-| Filtres – seuil de changement | durée avant alerte (180 j par défaut) |
 | Filtres – jours d'utilisation | compteur |
 | Filtres changés (remise à zéro) | à presser après le remplacement |
+
+Durée fixe de **365 jours** (un changement par an, préconisation constructeur pour une VMC double flux d'habitation) avant l'alerte « Filtres à changer » (réglage `filtre_seuil` en haut du YAML).
 
 ### 7.8 Indicateurs
 
@@ -215,9 +218,9 @@ Valeur par défaut : 0,21 €/kWh, une moyenne pour le tarif Base en 2026. Le pr
 | Écart rendements | grand écart = déséquilibre des débits |
 | Rapport débits extraction sur soufflage | 1,0 à 1,1 = idéal ; au-dessus de 1,3 = forte dépression |
 | Pression réseau extraction | dépression du réseau (capteur Huba) |
+| Consigne extraction | consigne de dépression appliquée selon le mode (vide en Manuel) |
 | Air soufflé froid | T insufflation inférieure à 15 °C pendant 10 min |
 | Risque givrage échangeur | T rejet inférieure à 1 °C pendant 5 min |
-| By-pass probablement ouvert | rendement soufflage inférieur à 30 % pendant 10 min |
 
 Les rendements et le rapport des débits ne sont calculés que si l'écart reprise/extérieur est d'au moins 6 °C. Par temps doux, ils restent vides.
 
@@ -225,23 +228,60 @@ Les rendements et le rapport des débits ne sont calculés que si l'écart repri
 
 ## 8. Les cartes Home Assistant
 
-1. Copier [`homeassistant/www/vmc_ha.svg`](../homeassistant/www/vmc_ha.svg) et [`vmc_ha_bypass.svg`](../homeassistant/www/vmc_ha_bypass.svg) dans `/config/www/`.
-2. Tableau de bord → Ajouter une carte → Manuel → coller [`carte-schema.yaml`](../homeassistant/dashboards/carte-schema.yaml) (schéma) et/ou [`carte-tuiles.yaml`](../homeassistant/dashboards/carte-tuiles.yaml) (tuiles Mushroom).
-3. Régler la **précision d'affichage** des entités (⚙ de chaque entité) : 1 décimale pour les températures, 0 pour la puissance, 2 pour le rapport des débits.
-4. Si vous avez nommé l'appareil autrement que `vmc`, adapter les `entity_id` (`sensor.vmc_…`).
+Deux cartes sont fournies. On peut utiliser l'une, l'autre ou les deux.
 
-Automatisation fournie : [`vmc-soufflage-nuit.yaml`](../homeassistant/automations/vmc-soufflage-nuit.yaml), soufflage à 70 % la nuit. **Elle ne sert qu'en mode Manuel.** En régulation automatique, préférez baisser la consigne de pression la nuit.
+| Carte | Fichier | Contenu | Besoin |
+|---|---|---|---|
+| **Schéma** | [`carte-schema.yaml`](../homeassistant/dashboards/carte-schema.yaml) | dessin de la VMC avec les températures, vitesses, débits, rendement, puissance, énergie, économie, pression et consigne | les images `.svg` (étape 1) |
+| **Tuiles** | [`carte-tuiles.yaml`](../homeassistant/dashboards/carte-tuiles.yaml) | mode de ventilation, curseurs en Manuel, alertes, filtres, diagnostic | les cartes **Mushroom** (étape 2) |
+
+### Étape 1 : copier les images du schéma (carte Schéma)
+
+1. Télécharger [`vmc_ha.svg`](../homeassistant/www/vmc_ha.svg) et [`vmc_ha_bypass.svg`](../homeassistant/www/vmc_ha_bypass.svg).
+2. Les copier dans le dossier **`/config/www/`** de Home Assistant (le créer s'il n'existe pas), avec l'application **File editor** ou **Studio Code Server** (Paramètres → Modules complémentaires), ou par le partage réseau **Samba**.
+3. Si le dossier `www` vient d'être créé : **redémarrer Home Assistant** (Paramètres → Système → ⏻ en haut à droite → Redémarrer).
+4. Vérifier : l'adresse `http://<IP-de-Home-Assistant>:8123/local/vmc_ha.svg` doit afficher le dessin.
+
+### Étape 2 : installer Mushroom (carte Tuiles)
+
+1. Installer **HACS** si ce n'est pas déjà fait (voir hacs.xyz).
+2. HACS → rechercher **« Mushroom »** → Télécharger.
+3. Recharger la page du navigateur (Ctrl + F5).
+
+### Étape 3 : ajouter une carte au tableau de bord
+
+1. Ouvrir le tableau de bord voulu, puis **✏️ (Modifier le tableau de bord)** en haut à droite.
+2. **+ Ajouter une carte**, faire défiler la liste jusqu'en bas et choisir **« Manuel »**.
+3. **Effacer** tout le texte proposé, puis **coller tout le contenu** du fichier `.yaml` de la carte (ouvrir le fichier sur GitHub → bouton « Copy raw file »).
+4. **Enregistrer**, puis **Terminé** en haut à droite.
+
+La carte **Schéma** est prévue en **pleine largeur** (`grid_options: columns: 24` à la fin du fichier) : plus étroite, certains textes se chevauchent.
+
+### Mettre à jour une carte existante (nouvelle version)
+
+1. **✏️ Modifier le tableau de bord**, survoler la carte, cliquer sur **Modifier**.
+2. En bas à gauche de la fenêtre : **« Afficher l'éditeur de code »** (ou ⋮ → Éditeur de code).
+3. Tout sélectionner (Ctrl + A), **coller** le nouveau contenu, **Enregistrer**, puis **Terminé**.
+
+### Réglages conseillés
+
+- **Précision d'affichage** de chaque entité (Paramètres → Appareils et services → ESPHome → VMC → cliquer sur l'entité → ⚙) : 1 décimale pour les températures, 0 pour la puissance, 2 pour le rapport des débits.
+- Les noms d'entités viennent du `friendly_name` de l'appareil (`VMC` → `sensor.vmc_…`). Avec un autre nom, ils changent : faire un rechercher/remplacer de `vmc_` dans le texte de la carte avant de la coller.
+- **Carte vide ou « entité non disponible »** : vérifier le nom de l'appareil (point précédent), que l'ESP est bien en ligne, et pour le schéma que les images sont bien dans `/config/www/`.
+
+Automatisations fournies :
+- [`vmc-mode-nuit.yaml`](../homeassistant/automations/vmc-mode-nuit.yaml) : mode **Éco** de 22 h à 8 h, **Confort** le jour. Elle ne touche pas à un mode Boost ou Manuel choisi à la main.
 
 ---
 
 ## 9. Mise en service conseillée
 
 1. Vérifier les sondes, les sorties 0-10 V et la pression (§5).
-2. Commencer en **Manuel**, avec les deux vitesses à environ 70 %, et laisser stabiliser 1 h.
+2. Commencer en mode **Manuel**, avec les deux vitesses à environ 70 %, et laisser stabiliser 1 h.
 3. **Mesurer les débits** (fil chaud ou cône) aux 4 vitesses et les saisir (§7.6).
 4. Noter la **pression extraction** au régime nominal, et en faire la **consigne**.
-5. Passer l'extraction en **Pression constante** et le soufflage en **Suivi extraction** (écart −5 %).
-6. Vérifier sur 24 h : rapport des débits entre 1,0 et 1,1, pas d'oscillation de vitesse, rendements proches.
+5. Passer en mode **Confort** (pression constante). Le soufflage suit l'extraction avec l'écart réglé (−5 % par défaut).
+6. Vérifier sur 24 h : rapport des débits entre 1,0 et 1,1 (sinon ajuster l'écart du soufflage), pas d'oscillation de vitesse, rendements proches.
 7. En été : by-pass en **Automatique**.
 
 > 🔥 Avec un appareil à combustion qui prend son air dans la maison (poêle, insert, chaudière), évitez toute forte dépression et installez un **détecteur de CO**.
@@ -260,7 +300,7 @@ Automatisation fournie : [`vmc-soufflage-nuit.yaml`](../homeassistant/automation
 | Le moteur reste à fond quoi qu'il arrive | entrée 0-10 V du moteur HS (+10 V rouge/bleu hors tolérance) | réparation ou échange du moteur |
 | Reprise trop froide | dépression forte, fuites dans les combles, siphon vide, gaines mal isolées | voir [`retour-d-experience.md`](retour-d-experience.md) |
 | Rendements et rapport vides | temps doux (écart inférieur à 6 °C) | normal |
-| La régulation oscille | réactivité trop forte | baisser « Régulation pression – réactivité » |
+| La régulation oscille | réactivité trop forte | baisser `pi_gain` en haut du YAML (0,05 %/Pa par défaut) et réinstaller |
 
 ---
 

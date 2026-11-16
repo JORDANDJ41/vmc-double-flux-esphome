@@ -122,11 +122,11 @@ cards:
       - type: custom:mushroom-template-card
         primary: By-pass
         secondary: >-
-          {{ 'Ouvert ?' if is_state('binary_sensor.vmc_by_pass_probablement_ouvert', 'on') else 'Fermé' }}
+          {{ 'Ouvert' if is_state('switch.vmc_by_pass_relais', 'on') else 'Fermé' }}
         icon: mdi:valve
         icon_color: >-
-          {{ 'amber' if is_state('binary_sensor.vmc_by_pass_probablement_ouvert', 'on') else 'grey' }}
-        entity: binary_sensor.vmc_by_pass_probablement_ouvert
+          {{ 'amber' if is_state('switch.vmc_by_pass_relais', 'on') else 'grey' }}
+        entity: switch.vmc_by_pass_relais
       - type: custom:mushroom-template-card
         primary: Givrage échangeur
         secondary: >-
@@ -147,7 +147,7 @@ cards:
         primary: Filtres
         secondary: >-
           {% set j = states('sensor.vmc_filtres_jours_d_utilisation') | float(0) | round(0) | int %}
-          {% set s = states('number.vmc_filtres_seuil_de_changement') | float(180) | int %}
+          {% set s = 365 %}
           {{ j }} / {{ s }} j{{ ' – À CHANGER' if is_state('binary_sensor.vmc_filtres_a_changer', 'on') else '' }}
         icon: mdi:air-filter
         icon_color: >-
@@ -163,31 +163,33 @@ cards:
           confirmation:
             text: Filtres changés ? Le compteur sera remis à zéro.
 
-  # ---------- Réglages ----------
-  - type: grid
-    columns: 2
-    square: false
-    cards:
-      - type: custom:mushroom-number-card
-        entity: number.vmc_vitesse_soufflage
-        name: Vitesse soufflage
-        icon: mdi:fan
-        display_mode: buttons
-      - type: custom:mushroom-number-card
-        entity: number.vmc_vitesse_extraction
-        name: Vitesse extraction
-        icon: mdi:fan
-        display_mode: buttons
-      - type: custom:mushroom-number-card
-        entity: number.vmc_debit_estime
-        name: Débit estimé
-        icon: mdi:weather-windy
-        display_mode: buttons
-      - type: custom:mushroom-number-card
-        entity: number.vmc_filtres_seuil_de_changement
-        name: Seuil filtres (j)
-        icon: mdi:air-filter
-        display_mode: buttons
+  # ---------- Mode de ventilation ----------
+  - type: custom:mushroom-select-card
+    entity: select.vmc_mode_de_ventilation
+    name: Mode de ventilation
+    icon: mdi:fan-auto
+
+  # Curseurs des deux ventilateurs : affichés seulement en mode Manuel
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: select.vmc_mode_de_ventilation
+        state: Manuel
+    card:
+      type: grid
+      columns: 2
+      square: false
+      cards:
+        - type: custom:mushroom-number-card
+          entity: number.vmc_vitesse_soufflage
+          name: Vitesse soufflage
+          icon: mdi:fan
+          display_mode: buttons
+        - type: custom:mushroom-number-card
+          entity: number.vmc_vitesse_extraction
+          name: Vitesse extraction
+          icon: mdi:fan
+          display_mode: buttons
 
   # ---------- Diagnostic ----------
   - type: grid

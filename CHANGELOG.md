@@ -1,5 +1,24 @@
 # Historique des versions
 
+## Prochaine version (v1.5.0, non testée) : modes Manuel / Éco / Confort / Boost
+
+- Un seul sélecteur **« Mode de ventilation »** remplace « Régulation extraction » et « Régulation soufflage » :
+  - **Manuel** : les deux vitesses (soufflage et extraction) se règlent à la main ;
+  - **Éco**, **Confort**, **Boost** : extraction à pression constante, avec une consigne par mode : **90 Pa** (Éco, nuit), **125 Pa** (Confort, jour), **170 Pa** (Boost). Les réglages s'appellent « Consigne Éco », « Consigne Confort » et « Consigne Boost » (noms courts, lisibles en entier dans Home Assistant).
+- **Soufflage automatique** en Éco / Confort / Boost : il suit l'extraction, avec l'écart réglable « Soufflage – écart / extraction ». Le mode « Équilibrage auto » et son réglage « rapport des débits visé » sont supprimés. Bouger un curseur à la main fait passer en Manuel.
+- Nouvelle automatisation [`vmc-mode-nuit.yaml`](homeassistant/automations/vmc-mode-nuit.yaml) : Éco de 22 h à 8 h, Confort le jour, sans toucher à un Boost ou un Manuel choisi à la main. Elle remplace `vmc-soufflage-nuit.yaml` (supprimée).
+- By-pass ouvert : la consigne free-cooling ne s'applique que si elle est plus élevée que celle du mode (un Boost reste un Boost).
+- `ota:` : ajout de `encryption:` (chiffrement des mises à jour sans fil), comme le propose ESPHome Builder : la question ne revient plus à chaque installation.
+- Carte schéma et page web de l'ESP : **mode de ventilation** affiché sous l'échangeur ; la consigne est masquée en Manuel.
+- Carte schéma en pleine largeur (`grid_options: columns: 24`) pour que la consigne ne chevauche pas la pression.
+- Notice : installation des cartes Home Assistant détaillée pas à pas (images, Mushroom, ajout et mise à jour d'une carte).
+- Carte Home Assistant (tuiles) : sélecteur de mode, et curseurs des deux ventilateurs affichés **seulement en mode Manuel** (carte conditionnelle).
+- **Réglages de mise en service uniquement sur la page web de l'ESP** (⚙ Configurer), plus dans Home Assistant (`internal: true` + `include_internal: true`) : affectation des sondes (Sonde 1 à 4 et les 4 sélecteurs de rôle), les 8 débits mesurés d'étalonnage et le « Débit estimé ».
+- Nouveau capteur **« Consigne extraction »** (Pa) : la consigne appliquée selon le mode (vide en Manuel), affichée à côté de la pression sur la page web de l'ESP et sur la carte schéma.
+- Page web de l'ESP : **boutons de mode** sous le schéma, utilisables sans code. Les curseurs des ventilateurs restent dans ⚙ Configurer (code requis).
+- **Réglages épurés** : l'antigel (seuil 1 °C, baisse maxi 40 %), la durée des filtres (365 jours, un changement par an) et la réactivité de la régulation (0,05 %/Pa) sont fixés dans le programme (substitutions en haut du YAML) et ne sont plus modifiables depuis Home Assistant. Le bouton « Filtres changés » reste.
+- Supprimés : « By-pass probablement ouvert » (le by-pass est piloté, la carte affiche l'état du relais) et « Économie moyenne par jour ».
+
 ## v1.4.1 (16/11/2026) : correction
 
 - **« COP – aide au réglage »** était indisponible dans Home Assistant : ce texte d'aide était classé en catégorie « config », réservée aux réglages modifiables. Il passe en catégorie **« diagnostic »**. Il reste affiché dans « Réglages » sur la page web de l'ESP.
