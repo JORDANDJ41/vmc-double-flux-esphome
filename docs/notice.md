@@ -130,6 +130,8 @@ Adresse : `http://<IP-de-l-ESP>` ou `http://vmc.local`. Elle fonctionne **sans H
 
 **Procédure** : pincer une sonde entre les doigts une minute, repérer la « Sonde X » qui monte, et l'affecter au bon rôle. Les choix sont mémorisés. Il n'y a rien à recompiler en cas de remplacement d'une sonde.
 
+Ces réglages n'apparaissent **que sur la page web de l'ESP** (⚙ Configurer, section « Sondes – affectation »), pas dans Home Assistant : ils ne servent qu'à l'installation ou au remplacement d'une sonde.
+
 ### 7.2 Commande des ventilateurs
 
 | Réglage | Rôle |

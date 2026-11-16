@@ -73,6 +73,7 @@ web_server:
   # Le schéma est servi par l'ESP et marche sans Internet ; seule la page
   # de configuration ESPHome (bouton Configurer) charge son interface depuis Internet.
   js_include: "vmc_synoptique.js"   # schéma de la VMC (fichier à placer dans /config/esphome/)
+  include_internal: true            # entités internes (affectation des sondes) visibles seulement sur la page web
   # auth:                # à activer pour un client :
   #   username: admin
   #   password: "choisir_un_mot_de_passe"
@@ -558,6 +559,7 @@ select:
 
   - platform: template
     id: sel_ext
+    internal: true           # réglable seulement depuis la page web de l'ESP (pas dans Home Assistant)
     name: "Affectation – air neuf (extérieur)"
     web_server:
       sorting_group_id: grp_sondes
@@ -570,6 +572,7 @@ select:
 
   - platform: template
     id: sel_insuf
+    internal: true           # réglable seulement depuis la page web de l'ESP (pas dans Home Assistant)
     name: "Affectation – insufflation"
     web_server:
       sorting_group_id: grp_sondes
@@ -582,6 +585,7 @@ select:
 
   - platform: template
     id: sel_rep
+    internal: true           # réglable seulement depuis la page web de l'ESP (pas dans Home Assistant)
     name: "Affectation – reprise (air extrait)"
     web_server:
       sorting_group_id: grp_sondes
@@ -594,6 +598,7 @@ select:
 
   - platform: template
     id: sel_rejet
+    internal: true           # réglable seulement depuis la page web de l'ESP (pas dans Home Assistant)
     name: "Affectation – rejet"
     web_server:
       sorting_group_id: grp_sondes
@@ -682,6 +687,7 @@ sensor:
   # sonde entre les doigts, repérer laquelle monte, et choisir le bon rôle.
   - platform: dallas_temp
     id: sonde_1
+    internal: true           # visible seulement sur la page web de l'ESP (pas dans Home Assistant)
     name: "Sonde 1"
     web_server:
       sorting_group_id: grp_sondes
@@ -691,6 +697,7 @@ sensor:
     entity_category: diagnostic
   - platform: dallas_temp
     id: sonde_2
+    internal: true           # visible seulement sur la page web de l'ESP (pas dans Home Assistant)
     name: "Sonde 2"
     web_server:
       sorting_group_id: grp_sondes
@@ -700,6 +707,7 @@ sensor:
     entity_category: diagnostic
   - platform: dallas_temp
     id: sonde_3
+    internal: true           # visible seulement sur la page web de l'ESP (pas dans Home Assistant)
     name: "Sonde 3"
     web_server:
       sorting_group_id: grp_sondes
@@ -709,6 +717,7 @@ sensor:
     entity_category: diagnostic
   - platform: dallas_temp
     id: sonde_4
+    internal: true           # visible seulement sur la page web de l'ESP (pas dans Home Assistant)
     name: "Sonde 4"
     web_server:
       sorting_group_id: grp_sondes
