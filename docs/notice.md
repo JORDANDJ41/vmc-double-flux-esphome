@@ -264,7 +264,7 @@ Deux cartes sont fournies. On peut utiliser l'une, l'autre ou les deux.
 ### Réglages conseillés
 
 - **Précision d'affichage** de chaque entité (Paramètres → Appareils et services → ESPHome → VMC → cliquer sur l'entité → ⚙) : 1 décimale pour les températures, 0 pour la puissance, 2 pour le rapport des débits.
-- Si l'appareil ESPHome ne s'appelle pas `vmc`, les noms d'entités changent (`sensor.test_1_…` au lieu de `sensor.vmc_…`) : faire un rechercher/remplacer de `vmc_` dans le texte de la carte avant de la coller.
+- Les noms d'entités viennent du `friendly_name` de l'appareil (`VMC` → `sensor.vmc_…`). Avec un autre nom, ils changent : faire un rechercher/remplacer de `vmc_` dans le texte de la carte avant de la coller.
 - **Carte vide ou « entité non disponible »** : vérifier le nom de l'appareil (point précédent), que l'ESP est bien en ligne, et pour le schéma que les images sont bien dans `/config/www/`.
 
 Automatisations fournies :
