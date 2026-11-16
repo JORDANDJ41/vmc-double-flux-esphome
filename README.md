@@ -6,7 +6,7 @@ Supervision et pilotage d'une **VMC double flux** (testé sur **Atlantic Duocosy
 
 ## Ce que ça fait
 
-- **4 sondes DS18B20** (air neuf, insufflation, reprise, rejet), avec **affectation des sondes modifiable depuis l'interface**, sans recompiler.
+- **4 sondes DS18B20** (air neuf, insufflation, reprise, rejet), avec **affectation des sondes modifiable depuis la page web de l'ESP**, sans recompiler.
 - **Rendements** côté soufflage et côté extraction, rendement moyen sur 1 h, **puissance et énergie récupérées**.
 - **Rapport des débits extraction/soufflage**, calculé par bilan thermique de l'échangeur : équilibre ou dépression de la maison.
 - **Débits réels en m³/h** après saisie de mesures d'étalonnage (fil chaud), utilisés pour la puissance et l'énergie récupérées.
