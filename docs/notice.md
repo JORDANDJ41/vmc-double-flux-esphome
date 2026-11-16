@@ -146,9 +146,9 @@ Ces réglages n'apparaissent **que sur la page web de l'ESP** (⚙ Configurer, s
 | Réglage | Valeur par défaut | Rôle |
 |---|---|---|
 | Mode de ventilation | Confort | **Manuel** : les deux vitesses se règlent à la main. **Éco**, **Confort**, **Boost** : extraction à pression constante avec la consigne du mode, et soufflage qui suit l'extraction |
-| Consigne dépression – Éco (nuit) | 90 Pa | moins de bruit et de consommation la nuit |
-| Consigne dépression – Confort | 125 Pa | régime normal de jour |
-| Consigne dépression – Boost | 170 Pa | coup de ventilation (odeurs, séchage, soirée d'été) |
+| Consigne Éco | 90 Pa | moins de bruit et de consommation la nuit |
+| Consigne Confort | 125 Pa | régime normal de jour |
+| Consigne Boost | 170 Pa | coup de ventilation (odeurs, séchage, soirée d'été) |
 | Soufflage – écart / extraction | −5 % | en Éco / Confort / Boost : soufflage = extraction + écart (négatif = légère dépression, positif = légère surpression) |
 
 - **Modes de ventilation** : les consignes sont mesurées au caisson (capteur de pression). Les gaines font perdre quelques Pa jusqu'aux bouches. Des bouches hygro B fonctionnent entre 80 et 160 Pa : vérifiez au manomètre si possible, la bouche la plus proche en Boost et la plus éloignée en Éco. Le changement de mode se fait à la main ou par un planning Home Assistant (automatisation fournie, voir §8). Si le by-pass est ouvert, la consigne free-cooling s'applique quand elle est plus élevée.

@@ -50,10 +50,22 @@ elements:
   - type: state-label
     entity: sensor.vmc_pression_reseau_extraction
     style: {left: 85%, top: 95%, color: "white", font-weight: 700, font-size: "clamp(12px, 2.1vw, 17px)"}
+  # Consigne : masquée en Manuel (pas de consigne)
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: select.vmc_mode_de_ventilation
+        state_not: Manuel
+    elements:
+      - type: state-label
+        entity: sensor.vmc_consigne_extraction
+        prefix: "consigne "
+        style: {left: 85%, top: 99%, color: "#8a93a6", font-size: "clamp(10px, 1.6vw, 13px)"}
+  # Mode de ventilation, sous l'échangeur
   - type: state-label
-    entity: sensor.vmc_consigne_extraction
-    prefix: "consigne "
-    style: {left: 85%, top: 99%, color: "#8a93a6", font-size: "clamp(10px, 1.6vw, 13px)"}
+    entity: select.vmc_mode_de_ventilation
+    prefix: "Mode : "
+    style: {left: 50%, top: 71%, color: "#c9d1e0", font-weight: 600, font-size: "clamp(11px, 1.8vw, 15px)"}
 
   # ---------- Alertes (n'apparaissent que si actives) ----------
   - type: conditional

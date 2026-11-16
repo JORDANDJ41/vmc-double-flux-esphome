@@ -490,7 +490,7 @@ number:
   # Bouches hygro B : 80-160 Pa à la bouche ; les gaines font perdre quelques Pa.
   - platform: template
     id: consigne_eco
-    name: "Consigne dépression – Éco (nuit)"
+    name: "Consigne Éco"
     web_server:
       sorting_group_id: grp_regul
       sorting_weight: 2.1
@@ -504,7 +504,7 @@ number:
     entity_category: config
   - platform: template
     id: consigne_pression
-    name: "Consigne dépression – Confort"
+    name: "Consigne Confort"
     web_server:
       sorting_group_id: grp_regul
       sorting_weight: 2.2
@@ -518,7 +518,7 @@ number:
     entity_category: config
   - platform: template
     id: consigne_boost
-    name: "Consigne dépression – Boost"
+    name: "Consigne Boost"
     web_server:
       sorting_group_id: grp_regul
       sorting_weight: 2.3
