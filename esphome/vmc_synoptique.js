@@ -51,7 +51,7 @@
   //  Dessin SVG
   // --------------------------------------------------------------------
   const svg = `
-<svg viewBox="0 0 760 430" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Segoe UI,Roboto,sans-serif">
+<svg viewBox="0 0 760 442" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Segoe UI,Roboto,sans-serif">
   <defs>
     <marker id="fl" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
       <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
@@ -140,6 +140,7 @@
     <text id="v-en" x="230" y="414">-- kWh</text>
     <text id="v-ratio" x="420" y="414">--</text>
     <text id="v-pres" x="590" y="414">-- Pa</text>
+    <text id="v-cons" x="590" y="436" fill="#8a93a6" font-size="13" font-weight="400"></text>
   </g>
 </svg>`;
 
@@ -236,8 +237,8 @@
     set("v-pw", num("pw") === null ? "-- W" : Math.round(num("pw")) + " W");
     set("v-en", (num("en") === null ? "-- kWh" : (num("en") / 1000).toFixed(2) + " kWh") +
       (num("eco") === null ? "" : " \u00b7 " + num("eco").toFixed(2).replace(".", ",") + " \u20ac"));
-    set("v-pres", (num("pres") === null ? "-- Pa" : Math.round(num("pres")) + " Pa")
-      + (num("cons") === null ? "" : " / consigne " + Math.round(num("cons"))));
+    set("v-pres", num("pres") === null ? "-- Pa" : Math.round(num("pres")) + " Pa");
+    set("v-cons", num("cons") === null ? "" : "consigne " + Math.round(num("cons")) + " Pa");
     const r = num("ratio");
     const dT = (num("trep") !== null && num("text") !== null) ? num("trep") - num("text") : null;
     set("v-ratio", r === null ? (dT !== null && dT < 6 ? "-- (doux)" : "calcul\u2026") :

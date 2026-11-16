@@ -4,6 +4,8 @@ Supervision et pilotage d'une **VMC double flux** (testé sur **Atlantic Duocosy
 
 ![Page web intégrée à l'ESP](docs/images/page-web-esp.png)
 
+*Page web de l'ESP en mode Confort (valeurs d'exemple d'une VMC réglée).*
+
 ## Ce que ça fait
 
 - **4 sondes DS18B20** (air neuf, insufflation, reprise, rejet), avec **affectation des sondes modifiable depuis la page web de l'ESP**, sans recompiler.
@@ -22,6 +24,8 @@ Supervision et pilotage d'une **VMC double flux** (testé sur **Atlantic Duocosy
 - **Cartes Home Assistant** : un schéma « picture-elements » et des tuiles Mushroom.
 
 ![Carte Home Assistant](docs/images/carte-home-assistant.png)
+
+*Carte Home Assistant (valeurs d'exemple).*
 
 ## Deux versions matérielles
 

@@ -1,5 +1,9 @@
 # Historique des versions
 
+## Prochaine version
+
+- Page web de l'ESP : la consigne s'affiche sur une ligne à part, sous la pression (elle débordait sur les écrans étroits).
+
 ## v1.5.0 (17/11/2026) : modes Manuel / Éco / Confort / Boost
 
 - Un seul sélecteur **« Mode de ventilation »** remplace « Régulation extraction » et « Régulation soufflage » :
