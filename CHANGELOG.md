@@ -1,5 +1,9 @@
 # Historique des versions
 
+## v1.4.1 (16/11/2026) : correction
+
+- **« COP – aide au réglage »** était indisponible dans Home Assistant : ce texte d'aide était classé en catégorie « config », réservée aux réglages modifiables. Il passe en catégorie **« diagnostic »**. Il reste affiché dans « Réglages » sur la page web de l'ESP.
+
 ## v1.4.0 (15/11/2026) : remises à zéro datées et économie par jour
 
 - **Remises à zéro datées** : l'ESP prend l'heure de Home Assistant (ou d'Internet en SNTP s'il tourne seul) et enregistre la date de la dernière remise à zéro de l'énergie (« Énergie récupérée – comptée depuis le ») et du dernier changement de filtres (« Filtres – changés le »).
