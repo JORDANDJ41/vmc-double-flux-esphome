@@ -147,7 +147,7 @@ cards:
         primary: Filtres
         secondary: >-
           {% set j = states('sensor.vmc_filtres_jours_d_utilisation') | float(0) | round(0) | int %}
-          {% set s = states('number.vmc_filtres_seuil_de_changement') | float(180) | int %}
+          {% set s = 180 %}
           {{ j }} / {{ s }} j{{ ' – À CHANGER' if is_state('binary_sensor.vmc_filtres_a_changer', 'on') else '' }}
         icon: mdi:air-filter
         icon_color: >-
