@@ -191,17 +191,6 @@ cards:
           icon: mdi:fan
           display_mode: buttons
 
-  # ---------- Réglages ----------
-  - type: grid
-    columns: 2
-    square: false
-    cards:
-      - type: custom:mushroom-number-card
-        entity: number.vmc_debit_estime
-        name: Débit estimé
-        icon: mdi:weather-windy
-        display_mode: buttons
-
   # ---------- Diagnostic ----------
   - type: grid
     columns: 2

@@ -238,6 +238,7 @@ output:
 number:
   - platform: template
     id: etal_qs25
+    internal: true           # réglable seulement depuis la page web de l'ESP (pas dans Home Assistant)
     name: "Débit soufflage mesuré à 25 %"
     web_server:
       sorting_group_id: grp_debits
@@ -253,6 +254,7 @@ number:
     entity_category: config
   - platform: template
     id: etal_qs50
+    internal: true           # réglable seulement depuis la page web de l'ESP (pas dans Home Assistant)
     name: "Débit soufflage mesuré à 50 %"
     web_server:
       sorting_group_id: grp_debits
@@ -268,6 +270,7 @@ number:
     entity_category: config
   - platform: template
     id: etal_qs75
+    internal: true           # réglable seulement depuis la page web de l'ESP (pas dans Home Assistant)
     name: "Débit soufflage mesuré à 75 %"
     web_server:
       sorting_group_id: grp_debits
@@ -283,6 +286,7 @@ number:
     entity_category: config
   - platform: template
     id: etal_qs100
+    internal: true           # réglable seulement depuis la page web de l'ESP (pas dans Home Assistant)
     name: "Débit soufflage mesuré à 100 %"
     web_server:
       sorting_group_id: grp_debits
@@ -298,6 +302,7 @@ number:
     entity_category: config
   - platform: template
     id: etal_qe25
+    internal: true           # réglable seulement depuis la page web de l'ESP (pas dans Home Assistant)
     name: "Débit extraction mesuré à 25 %"
     web_server:
       sorting_group_id: grp_debits
@@ -313,6 +318,7 @@ number:
     entity_category: config
   - platform: template
     id: etal_qe50
+    internal: true           # réglable seulement depuis la page web de l'ESP (pas dans Home Assistant)
     name: "Débit extraction mesuré à 50 %"
     web_server:
       sorting_group_id: grp_debits
@@ -328,6 +334,7 @@ number:
     entity_category: config
   - platform: template
     id: etal_qe75
+    internal: true           # réglable seulement depuis la page web de l'ESP (pas dans Home Assistant)
     name: "Débit extraction mesuré à 75 %"
     web_server:
       sorting_group_id: grp_debits
@@ -343,6 +350,7 @@ number:
     entity_category: config
   - platform: template
     id: etal_qe100
+    internal: true           # réglable seulement depuis la page web de l'ESP (pas dans Home Assistant)
     name: "Débit extraction mesuré à 100 %"
     web_server:
       sorting_group_id: grp_debits
@@ -416,6 +424,7 @@ number:
     entity_category: config
   - platform: template
     id: debit
+    internal: true           # réglable seulement depuis la page web de l'ESP (pas dans Home Assistant)
     name: "Débit estimé"
     web_server:
       sorting_group_id: grp_reglages

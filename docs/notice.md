@@ -179,6 +179,8 @@ En mode Automatique, le by-pass s'ouvre si **les trois conditions** sont réunie
 
 8 cases : débit mesuré à **25, 50, 75 et 100 %**, pour le soufflage et pour l'extraction. Seules les cases non nulles sont utilisées. Méthodes de mesure : [`etalonnage-et-mesures.md`](etalonnage-et-mesures.md).
 
+Ces 8 cases et le **« Débit estimé »** se règlent **uniquement sur la page web de l'ESP** (⚙ Configurer, sections « Étalonnage des débits » et « Réglages »), pas dans Home Assistant : ce sont des réglages de mise en service. Les débits calculés (soufflage, extraction) restent dans Home Assistant.
+
 | Capteur | Calcul |
 |---|---|
 | Débit soufflage | courbe d'étalonnage selon la vitesse réellement envoyée (antigel compris), sinon « Débit estimé » (débit à 100 %) × vitesse |
