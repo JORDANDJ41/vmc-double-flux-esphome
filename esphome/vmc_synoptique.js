@@ -232,7 +232,7 @@
     set("v-vs", (num("vs") === null ? "-- %" : Math.round(num("vs")) + " %") + (num("qs") === null ? "" : " \u00b7 " + Math.round(num("qs")) + " m\u00b3/h"));
     set("v-ve", (num("ve") === null ? "-- %" : Math.round(num("ve")) + " %") + (num("qe") === null ? "" : " \u00b7 " + Math.round(num("qe")) + " m\u00b3/h"));
     set("v-eta", num("eta") === null ? "-- %" : Math.round(num("eta")) + " %");
-    set("v-mode", typeof val.mode === "string" ? "Mode : " + val.mode : "");
+    set("v-mode", typeof val.mode === "string" ? val.mode : "");
     set("v-pw", num("pw") === null ? "-- W" : Math.round(num("pw")) + " W");
     set("v-en", (num("en") === null ? "-- kWh" : (num("en") / 1000).toFixed(2) + " kWh") +
       (num("eco") === null ? "" : " \u00b7 " + num("eco").toFixed(2).replace(".", ",") + " \u20ac"));

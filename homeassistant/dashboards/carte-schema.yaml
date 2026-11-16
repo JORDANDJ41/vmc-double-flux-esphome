@@ -64,7 +64,6 @@ elements:
   # Mode de ventilation, sous l'échangeur
   - type: state-label
     entity: select.vmc_mode_de_ventilation
-    prefix: "Mode : "
     style: {left: 50%, top: 71%, color: "#c9d1e0", font-weight: 600, font-size: "clamp(11px, 1.8vw, 15px)"}
 
   # ---------- Alertes (n'apparaissent que si actives) ----------
