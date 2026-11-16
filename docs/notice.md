@@ -143,12 +143,16 @@ Adresse : `http://<IP-de-l-ESP>` ou `http://vmc.local`. Elle fonctionne **sans H
 | Réglage | Valeur par défaut | Rôle |
 |---|---|---|
 | Régulation extraction | Pression constante | **Manuel** ou **Pression constante** |
-| Consigne dépression extraction | 120 Pa | dépression à maintenir dans le réseau d'extraction |
+| Mode de ventilation | Confort | **Éco**, **Confort** ou **Boost** : choisit la consigne de dépression utilisée |
+| Consigne dépression – Éco (nuit) | 90 Pa | moins de bruit et de consommation la nuit |
+| Consigne dépression – Confort | 125 Pa | régime normal de jour |
+| Consigne dépression – Boost | 170 Pa | coup de ventilation (odeurs, séchage, soirée d'été) |
 | Régulation pression – réactivité | 0,05 %/Pa | à augmenter si la régulation est trop lente, à diminuer si elle oscille |
 | Régulation soufflage | Suivi extraction | **Manuel**, **Suivi extraction** ou **Équilibrage auto** |
 | Soufflage – écart / extraction | −5 % | en Suivi : soufflage = extraction + écart (négatif = légère dépression) |
 | Soufflage – rapport des débits visé | 1,05 | en Équilibrage auto : rapport extraction/soufflage visé |
 
+- **Modes de ventilation** : les consignes sont mesurées au caisson (capteur de pression). Les gaines font perdre quelques Pa jusqu'aux bouches. Des bouches hygro B fonctionnent entre 80 et 160 Pa : vérifiez au manomètre si possible, la bouche la plus proche en Boost et la plus éloignée en Éco. Le changement de mode se fait à la main ou par un planning Home Assistant (automatisation fournie, voir §8). Si le by-pass est ouvert, la consigne free-cooling s'applique quand elle est plus élevée.
 - **Pression constante** : quand les bouches hygro s'ouvrent, la pression baisse et l'extraction accélère. Zone morte ±3 Pa, variation de 3 % maximum toutes les 5 s.
 - **Équilibrage auto** : correction de ±3 % toutes les 10 min, d'après les températures. C'est volontairement lent, à cause de l'inertie thermique. Inactif par temps doux (écart reprise/extérieur inférieur à 6 °C) et pendant l'antigel.
 
@@ -230,7 +234,9 @@ Les rendements et le rapport des débits ne sont calculés que si l'écart repri
 3. Régler la **précision d'affichage** des entités (⚙ de chaque entité) : 1 décimale pour les températures, 0 pour la puissance, 2 pour le rapport des débits.
 4. Si vous avez nommé l'appareil autrement que `vmc`, adapter les `entity_id` (`sensor.vmc_…`).
 
-Automatisation fournie : [`vmc-soufflage-nuit.yaml`](../homeassistant/automations/vmc-soufflage-nuit.yaml), soufflage à 70 % la nuit. **Elle ne sert qu'en mode Manuel.** En régulation automatique, préférez baisser la consigne de pression la nuit.
+Automatisations fournies :
+- [`vmc-mode-nuit.yaml`](../homeassistant/automations/vmc-mode-nuit.yaml) : mode **Éco** de 22 h à 8 h, **Confort** le jour. À utiliser en régulation automatique (pression constante + suivi extraction).
+- [`vmc-soufflage-nuit.yaml`](../homeassistant/automations/vmc-soufflage-nuit.yaml) : soufflage à 70 % la nuit. **Elle ne sert qu'en mode Manuel.**
 
 ---
 

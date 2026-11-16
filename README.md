@@ -12,6 +12,7 @@ Supervision et pilotage d'une **VMC double flux** (testé sur **Atlantic Duocosy
 - **Débits réels en m³/h** après saisie de mesures d'étalonnage (fil chaud), utilisés pour la puissance et l'énergie récupérées.
 - **Pression du réseau d'extraction**, mesurée par le capteur Huba d'origine (0,5-4,5 V = 0-300 Pa).
 - **Commande des 2 moteurs EC en 0-10 V**, de 10 à 100 %.
+- **Modes Éco / Confort / Boost** : une consigne de dépression par mode, basculée à la main ou par un planning Home Assistant (Éco la nuit : moins de bruit, sans déséquilibre).
 - **Régulation automatique** : extraction **à pression constante** (consigne en Pa, comme la régulation hygro d'origine : quand les bouches s'ouvrent, l'extraction accélère), et soufflage en **suivi de l'extraction** (avec un écart réglable) ou en **équilibrage automatique** sur le rapport des débits.
 - **Antigel progressif** : si T rejet passe sous le seuil (1 °C par défaut), le soufflage baisse de 5 %/min (jusqu'à une baisse maximale réglable) et l'extraction augmente, sans jamais couper le soufflage.
 - **Alertes** : risque de givre de l'échangeur, air soufflé froid, by-pass ouvert, filtres à changer (compteur de jours avec remise à zéro).

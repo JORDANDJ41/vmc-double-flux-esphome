@@ -1,0 +1,35 @@
+alias: VMC – Mode Éco la nuit
+description: Mode Éco (consigne de dépression basse) de 22 h à 8 h, Confort le jour. Régulation automatique uniquement.
+mode: restart
+triggers:
+  - trigger: time
+    at: "22:00:00"
+  - trigger: time
+    at: "08:00:00"
+  - trigger: homeassistant
+    event: start
+conditions:
+  # Ne pas écraser un Boost lancé à la main
+  - condition: not
+    conditions:
+      - condition: state
+        entity_id: select.vmc_mode_de_ventilation
+        state: "Boost"
+actions:
+  - choose:
+      - conditions:
+          - condition: time
+            after: "22:00:00"
+            before: "08:00:00"
+        sequence:
+          - action: select.select_option
+            target:
+              entity_id: select.vmc_mode_de_ventilation
+            data:
+              option: "Éco"
+    default:
+      - action: select.select_option
+        target:
+          entity_id: select.vmc_mode_de_ventilation
+        data:
+          option: "Confort"

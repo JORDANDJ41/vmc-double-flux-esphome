@@ -1,5 +1,11 @@
 # Historique des versions
 
+## Prochaine version (v1.5.0, non testée) : modes Éco / Confort / Boost
+
+- Nouveau sélecteur **« Mode de ventilation »** : **Éco**, **Confort** ou **Boost**. Chaque mode a sa propre consigne de dépression : **90 Pa** (Éco, nuit), **125 Pa** (Confort, jour) et **170 Pa** (Boost). « Consigne dépression extraction » devient « Consigne dépression – Confort » (même entité).
+- Nouvelle automatisation Home Assistant [`vmc-mode-nuit.yaml`](homeassistant/automations/vmc-mode-nuit.yaml) : Éco de 22 h à 8 h, Confort le jour, sans écraser un Boost en cours. Moins de bruit la nuit, sans déséquilibrer soufflage et extraction.
+- By-pass ouvert : la consigne free-cooling ne s'applique plus que si elle est plus élevée que celle du mode (un Boost reste un Boost).
+
 ## v1.4.1 (16/11/2026) : correction
 
 - **« COP – aide au réglage »** était indisponible dans Home Assistant : ce texte d'aide était classé en catégorie « config », réservée aux réglages modifiables. Il passe en catégorie **« diagnostic »**. Il reste affiché dans « Réglages » sur la page web de l'ESP.

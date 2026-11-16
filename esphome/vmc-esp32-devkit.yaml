@@ -180,7 +180,10 @@ interval:
           if (!m.has_value() || *m != 1) { id(pi_mem_err) = 0; return; }
           float p = id(p_extraction).state;
           if (isnan(p)) return;                                  // capteur absent : on ne touche à rien
-          float c = id(consigne_pression).state;
+          // Mode de ventilation : 0 = Éco, 1 = Confort, 2 = Boost
+          auto mv = id(mode_ventil).active_index();
+          int md = mv.has_value() ? (int) *mv : 1;
+          float c = md == 0 ? id(consigne_eco).state : (md == 2 ? id(consigne_boost).state : id(consigne_pression).state);
           c += 0.5f * id(antigel_red);                              // antigel : + extraction
           float err = c - p;                                        // >0 : pas assez de dépression
           if (fabsf(err) < 3.0f) err = 0;                         // zone morte ±3 Pa
@@ -407,17 +410,47 @@ number:
     restore_value: true
     optimistic: true
     entity_category: config
+  # Consignes de dépression par mode (mesurées au caisson, capteur Huba).
+  # Bouches hygro B : 80-160 Pa à la bouche ; les gaines font perdre quelques Pa.
   - platform: template
-    id: consigne_pression
-    name: "Consigne dépression extraction"
+    id: consigne_eco
+    name: "Consigne dépression – Éco (nuit)"
     web_server:
       sorting_group_id: grp_regul
-      sorting_weight: 2
+      sorting_weight: 2.1
     unit_of_measurement: "Pa"
     min_value: 40
     max_value: 280
     step: 5
-    initial_value: 120
+    initial_value: 90
+    restore_value: true
+    optimistic: true
+    entity_category: config
+  - platform: template
+    id: consigne_pression
+    name: "Consigne dépression – Confort"
+    web_server:
+      sorting_group_id: grp_regul
+      sorting_weight: 2.2
+    unit_of_measurement: "Pa"
+    min_value: 40
+    max_value: 280
+    step: 5
+    initial_value: 125
+    restore_value: true
+    optimistic: true
+    entity_category: config
+  - platform: template
+    id: consigne_boost
+    name: "Consigne dépression – Boost"
+    web_server:
+      sorting_group_id: grp_regul
+      sorting_weight: 2.3
+    unit_of_measurement: "Pa"
+    min_value: 40
+    max_value: 280
+    step: 5
+    initial_value: 170
     restore_value: true
     optimistic: true
     entity_category: config
@@ -606,6 +639,17 @@ number:
             return 1.0f - lvl;                               // output en inverted: true
 
 select:
+  - platform: template
+    id: mode_ventil
+    name: "Mode de ventilation"
+    web_server:
+      sorting_group_id: grp_regul
+      sorting_weight: 1.5
+    icon: mdi:fan-auto
+    options: ["Éco", "Confort", "Boost"]
+    initial_option: "Confort"
+    restore_value: true
+    optimistic: true
   - platform: template
     id: regul_extr
     name: "Régulation extraction"
