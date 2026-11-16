@@ -8,6 +8,7 @@
 - **Soufflage automatique** en Éco / Confort / Boost : il suit l'extraction, avec l'écart réglable « Soufflage – écart / extraction ». Le mode « Équilibrage auto » et son réglage « rapport des débits visé » sont supprimés. Bouger un curseur à la main fait passer en Manuel.
 - Nouvelle automatisation [`vmc-mode-nuit.yaml`](homeassistant/automations/vmc-mode-nuit.yaml) : Éco de 22 h à 8 h, Confort le jour, sans toucher à un Boost ou un Manuel choisi à la main. Elle remplace `vmc-soufflage-nuit.yaml` (supprimée).
 - By-pass ouvert : la consigne free-cooling ne s'applique que si elle est plus élevée que celle du mode (un Boost reste un Boost).
+- Notice : installation des cartes Home Assistant détaillée pas à pas (images, Mushroom, ajout et mise à jour d'une carte).
 - Carte Home Assistant (tuiles) : sélecteur de mode, et curseurs des deux ventilateurs affichés **seulement en mode Manuel** (carte conditionnelle).
 - **Réglages de mise en service uniquement sur la page web de l'ESP** (⚙ Configurer), plus dans Home Assistant (`internal: true` + `include_internal: true`) : affectation des sondes (Sonde 1 à 4 et les 4 sélecteurs de rôle), les 8 débits mesurés d'étalonnage et le « Débit estimé ».
 - Nouveau capteur **« Consigne extraction »** (Pa) : la consigne appliquée selon le mode (vide en Manuel), affichée à côté de la pression sur la page web de l'ESP et sur la carte schéma.

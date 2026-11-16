@@ -228,10 +228,44 @@ Les rendements et le rapport des débits ne sont calculés que si l'écart repri
 
 ## 8. Les cartes Home Assistant
 
-1. Copier [`homeassistant/www/vmc_ha.svg`](../homeassistant/www/vmc_ha.svg) et [`vmc_ha_bypass.svg`](../homeassistant/www/vmc_ha_bypass.svg) dans `/config/www/`.
-2. Tableau de bord → Ajouter une carte → Manuel → coller [`carte-schema.yaml`](../homeassistant/dashboards/carte-schema.yaml) (schéma) et/ou [`carte-tuiles.yaml`](../homeassistant/dashboards/carte-tuiles.yaml) (tuiles Mushroom).
-3. Régler la **précision d'affichage** des entités (⚙ de chaque entité) : 1 décimale pour les températures, 0 pour la puissance, 2 pour le rapport des débits.
-4. Si vous avez nommé l'appareil autrement que `vmc`, adapter les `entity_id` (`sensor.vmc_…`).
+Deux cartes sont fournies. On peut utiliser l'une, l'autre ou les deux.
+
+| Carte | Fichier | Contenu | Besoin |
+|---|---|---|---|
+| **Schéma** | [`carte-schema.yaml`](../homeassistant/dashboards/carte-schema.yaml) | dessin de la VMC avec les températures, vitesses, débits, rendement, puissance, énergie, économie, pression et consigne | les images `.svg` (étape 1) |
+| **Tuiles** | [`carte-tuiles.yaml`](../homeassistant/dashboards/carte-tuiles.yaml) | mode de ventilation, curseurs en Manuel, alertes, filtres, diagnostic | les cartes **Mushroom** (étape 2) |
+
+### Étape 1 : copier les images du schéma (carte Schéma)
+
+1. Télécharger [`vmc_ha.svg`](../homeassistant/www/vmc_ha.svg) et [`vmc_ha_bypass.svg`](../homeassistant/www/vmc_ha_bypass.svg).
+2. Les copier dans le dossier **`/config/www/`** de Home Assistant (le créer s'il n'existe pas), avec l'application **File editor** ou **Studio Code Server** (Paramètres → Modules complémentaires), ou par le partage réseau **Samba**.
+3. Si le dossier `www` vient d'être créé : **redémarrer Home Assistant** (Paramètres → Système → ⏻ en haut à droite → Redémarrer).
+4. Vérifier : l'adresse `http://<IP-de-Home-Assistant>:8123/local/vmc_ha.svg` doit afficher le dessin.
+
+### Étape 2 : installer Mushroom (carte Tuiles)
+
+1. Installer **HACS** si ce n'est pas déjà fait (voir hacs.xyz).
+2. HACS → rechercher **« Mushroom »** → Télécharger.
+3. Recharger la page du navigateur (Ctrl + F5).
+
+### Étape 3 : ajouter une carte au tableau de bord
+
+1. Ouvrir le tableau de bord voulu, puis **✏️ (Modifier le tableau de bord)** en haut à droite.
+2. **+ Ajouter une carte**, faire défiler la liste jusqu'en bas et choisir **« Manuel »**.
+3. **Effacer** tout le texte proposé, puis **coller tout le contenu** du fichier `.yaml` de la carte (ouvrir le fichier sur GitHub → bouton « Copy raw file »).
+4. **Enregistrer**, puis **Terminé** en haut à droite.
+
+### Mettre à jour une carte existante (nouvelle version)
+
+1. **✏️ Modifier le tableau de bord**, survoler la carte, cliquer sur **Modifier**.
+2. En bas à gauche de la fenêtre : **« Afficher l'éditeur de code »** (ou ⋮ → Éditeur de code).
+3. Tout sélectionner (Ctrl + A), **coller** le nouveau contenu, **Enregistrer**, puis **Terminé**.
+
+### Réglages conseillés
+
+- **Précision d'affichage** de chaque entité (Paramètres → Appareils et services → ESPHome → VMC → cliquer sur l'entité → ⚙) : 1 décimale pour les températures, 0 pour la puissance, 2 pour le rapport des débits.
+- Si l'appareil ESPHome ne s'appelle pas `vmc`, les noms d'entités changent (`sensor.test_1_…` au lieu de `sensor.vmc_…`) : faire un rechercher/remplacer de `vmc_` dans le texte de la carte avant de la coller.
+- **Carte vide ou « entité non disponible »** : vérifier le nom de l'appareil (point précédent), que l'ESP est bien en ligne, et pour le schéma que les images sont bien dans `/config/www/`.
 
 Automatisations fournies :
 - [`vmc-mode-nuit.yaml`](../homeassistant/automations/vmc-mode-nuit.yaml) : mode **Éco** de 22 h à 8 h, **Confort** le jour. Elle ne touche pas à un mode Boost ou Manuel choisi à la main.
