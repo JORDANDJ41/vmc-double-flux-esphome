@@ -9,6 +9,7 @@
 - Nouvelle automatisation [`vmc-mode-nuit.yaml`](homeassistant/automations/vmc-mode-nuit.yaml) : Éco de 22 h à 8 h, Confort le jour, sans toucher à un Boost ou un Manuel choisi à la main. Elle remplace `vmc-soufflage-nuit.yaml` (supprimée).
 - By-pass ouvert : la consigne free-cooling ne s'applique que si elle est plus élevée que celle du mode (un Boost reste un Boost).
 - Carte Home Assistant (tuiles) : sélecteur de mode, et curseurs des deux ventilateurs affichés **seulement en mode Manuel** (carte conditionnelle).
+- Page web de l'ESP : **boutons de mode** sous le schéma, utilisables sans code. Les curseurs des ventilateurs restent dans ⚙ Configurer (code requis).
 - **Réglages épurés** : l'antigel (seuil 1 °C, baisse maxi 40 %), la durée des filtres (180 jours) et la réactivité de la régulation (0,05 %/Pa) sont fixés dans le programme (substitutions en haut du YAML) et ne sont plus modifiables depuis Home Assistant. Le bouton « Filtres changés » reste.
 - Supprimés : « By-pass probablement ouvert » (le by-pass est piloté, la carte affiche l'état du relais) et « Économie moyenne par jour ».
 

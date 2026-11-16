@@ -110,6 +110,7 @@ Adresse : `http://<IP-de-l-ESP>` ou `http://vmc.local`. Elle fonctionne **sans H
 
 - **Schéma animé** : températures, rendement, ventilateurs (vitesse et débit), by-pass, puissance, énergie, équilibre et pression.
 - **Pastilles d'alerte** : givre, antigel actif, air soufflé froid, by-pass, filtres.
+- **Boutons de mode** (Manuel, Éco, Confort, Boost) : seul réglage accessible sans code. En Manuel, les curseurs des ventilateurs se règlent dans ⚙ Configurer.
 - **⚙ Configurer** : code `admin` par défaut. Modifiable en haut de `vmc_synoptique.js` (`CODE_CONFIG`), puis recompiler.
 
 > Le code ne fait que **masquer** la configuration. Pour une vraie protection (installation chez un client), activez le bloc `auth:` dans `web_server` : le navigateur demandera alors un identifiant et un mot de passe.
