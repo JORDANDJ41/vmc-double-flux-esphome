@@ -199,24 +199,13 @@ interval:
           if (v < 10) v = 10; if (v > 100) v = 100;
           if (fabsf(v - id(v_extr).state) >= 0.5f)
             { id(regul_ecrit) = true; id(v_extr).make_call().set_value(roundf(v)).perform(); id(regul_ecrit) = false; }
-          // soufflage : suit toujours l'extraction (+ écart réglable)
+          // Éco / Confort / Boost : le soufflage suit l'extraction (+ écart réglable)
           {
             float vs = roundf(v + id(suivi_ecart).state);
             if (vs < 10) vs = 10; if (vs > 100) vs = 100;
             if (fabsf(vs - id(v_souff).state) >= 1.0f)
               { id(regul_ecrit) = true; id(v_souff).make_call().set_value(vs).perform(); id(regul_ecrit) = false; }
           }
-
-  # ---------- Soufflage : suivi de l'extraction en mode Manuel ----------
-  - interval: 10s
-    then:
-      - lambda: |-
-          auto mv = id(mode_ventil).active_index();
-          if (mv.has_value() && *mv != 0) return;                 // Éco/Confort/Boost : géré par la boucle pression
-          float vs = roundf(id(v_extr).state + id(suivi_ecart).state);
-          if (vs < 10) vs = 10; if (vs > 100) vs = 100;
-          if (fabsf(vs - id(v_souff).state) >= 1.0f)
-            { id(regul_ecrit) = true; id(v_souff).make_call().set_value(vs).perform(); id(regul_ecrit) = false; }
 
   - interval: 1h
     then:
@@ -473,7 +462,12 @@ number:
     entity_category: config
 
   - platform: template
-    id: v_souff               # interne : piloté uniquement par la régulation (suit l'extraction)
+    id: v_souff
+    name: "Vitesse soufflage"
+    web_server:
+      sorting_group_id: grp_cmd
+      sorting_weight: 1
+    icon: mdi:fan
     unit_of_measurement: "%"
     min_value: 10
     max_value: 100
@@ -482,6 +476,13 @@ number:
     restore_value: true
     optimistic: true
     set_action:
+      - lambda: |-
+          // curseur bougé à la main en Éco/Confort/Boost -> passage en Manuel (et il y reste)
+          if (!id(regul_ecrit)) {
+            auto m = id(mode_ventil).active_index();
+            if (m.has_value() && *m != 0)
+              id(mode_ventil).make_call().set_option("Manuel").perform();
+          }
       - output.set_level:
           id: pwm_souff
           level: !lambda |-
@@ -541,8 +542,8 @@ number:
             return 1.0f - lvl;                               // output en inverted: true
 
 select:
-  # Manuel : vitesse d'extraction réglée à la main ; Éco / Confort / Boost : extraction
-  # à pression constante (une consigne par mode). Le soufflage suit toujours l'extraction.
+  # Manuel : les deux vitesses se règlent à la main ; Éco / Confort / Boost : extraction
+  # à pression constante (une consigne par mode) et soufflage qui suit l'extraction.
   - platform: template
     id: mode_ventil
     name: "Mode de ventilation"
@@ -604,21 +605,6 @@ select:
     entity_category: config
 
 sensor:
-  # Vitesse de soufflage en lecture seule (le soufflage suit l'extraction)
-  - platform: template
-    name: "Vitesse soufflage"
-    web_server:
-      sorting_group_id: grp_cmd
-      sorting_weight: 1
-    icon: mdi:fan
-    unit_of_measurement: "%"
-    accuracy_decimals: 0
-    update_interval: 5s
-    lambda: return id(v_souff).state;
-    filters:
-      - or:
-          - throttle: 300s
-          - delta: 1
   # ---------- Débits calculés à partir de l'étalonnage (0 = non étalonné) ----------
   - platform: template
     id: q_souff

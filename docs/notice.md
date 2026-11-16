@@ -133,25 +133,24 @@ Adresse : `http://<IP-de-l-ESP>` ou `http://vmc.local`. Elle fonctionne **sans H
 
 | Réglage | Rôle |
 |---|---|
-| Vitesse extraction (10-100 %) | 10 % = 1 V, 100 % = 10 V sur le fil jaune. Réglable en mode **Manuel** |
-| Vitesse soufflage | lecture seule : le soufflage suit toujours l'extraction (+ écart réglable) |
+| Vitesse soufflage / extraction (10-100 %) | 10 % = 1 V, 100 % = 10 V sur le fil jaune. Réglage à la main en mode **Manuel** ; en Éco / Confort / Boost, c'est la régulation qui les pilote |
 | Coupure moteur soufflage / extraction | coupe le 230 V (relais câblés en NF : au repos, le moteur tourne) |
 
-**Bouger le curseur d'extraction à la main fait passer le mode de ventilation en Manuel**, et il y reste.
+**Bouger un curseur à la main fait passer le mode de ventilation en Manuel**, et il y reste. Sur la carte Home Assistant fournie, les deux curseurs n'apparaissent qu'en mode Manuel.
 
 ### 7.3 Régulation automatique
 
 | Réglage | Valeur par défaut | Rôle |
 |---|---|---|
-| Mode de ventilation | Confort | **Manuel** : vitesse d'extraction réglée à la main. **Éco**, **Confort**, **Boost** : extraction à pression constante, avec la consigne du mode |
+| Mode de ventilation | Confort | **Manuel** : les deux vitesses se règlent à la main. **Éco**, **Confort**, **Boost** : extraction à pression constante avec la consigne du mode, et soufflage qui suit l'extraction |
 | Consigne dépression – Éco (nuit) | 90 Pa | moins de bruit et de consommation la nuit |
 | Consigne dépression – Confort | 125 Pa | régime normal de jour |
 | Consigne dépression – Boost | 170 Pa | coup de ventilation (odeurs, séchage, soirée d'été) |
-| Soufflage – écart / extraction | −5 % | soufflage = extraction + écart, dans tous les modes (négatif = légère dépression, positif = légère surpression) |
+| Soufflage – écart / extraction | −5 % | en Éco / Confort / Boost : soufflage = extraction + écart (négatif = légère dépression, positif = légère surpression) |
 
 - **Modes de ventilation** : les consignes sont mesurées au caisson (capteur de pression). Les gaines font perdre quelques Pa jusqu'aux bouches. Des bouches hygro B fonctionnent entre 80 et 160 Pa : vérifiez au manomètre si possible, la bouche la plus proche en Boost et la plus éloignée en Éco. Le changement de mode se fait à la main ou par un planning Home Assistant (automatisation fournie, voir §8). Si le by-pass est ouvert, la consigne free-cooling s'applique quand elle est plus élevée.
 - **Pression constante** : quand les bouches hygro s'ouvrent, la pression baisse et l'extraction accélère. Zone morte ±3 Pa, variation de 3 % maximum toutes les 5 s.
-- **Soufflage** : il n'est pas réglable directement. Il suit l'extraction avec l'écart réglé, ce qui garde la maison équilibrée quel que soit le mode. Pour corriger un déséquilibre (voir « Rapport débits »), ajustez l'écart.
+- **Soufflage** : en Éco / Confort / Boost, il suit l'extraction avec l'écart réglé, ce qui garde la maison équilibrée. Pour corriger un déséquilibre (voir « Rapport débits »), ajustez l'écart. En Manuel, il se règle à la main, indépendamment.
 
 ### 7.4 Antigel
 
@@ -236,7 +235,7 @@ Automatisations fournies :
 ## 9. Mise en service conseillée
 
 1. Vérifier les sondes, les sorties 0-10 V et la pression (§5).
-2. Commencer en mode **Manuel**, extraction à environ 70 % (le soufflage suit), et laisser stabiliser 1 h.
+2. Commencer en mode **Manuel**, avec les deux vitesses à environ 70 %, et laisser stabiliser 1 h.
 3. **Mesurer les débits** (fil chaud ou cône) aux 4 vitesses et les saisir (§7.6).
 4. Noter la **pression extraction** au régime nominal, et en faire la **consigne**.
 5. Passer en mode **Confort** (pression constante). Le soufflage suit l'extraction avec l'écart réglé (−5 % par défaut).

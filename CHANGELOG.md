@@ -3,12 +3,12 @@
 ## Prochaine version (v1.5.0, non testée) : modes Manuel / Éco / Confort / Boost
 
 - Un seul sélecteur **« Mode de ventilation »** remplace « Régulation extraction » et « Régulation soufflage » :
-  - **Manuel** : la vitesse d'extraction se règle à la main ;
+  - **Manuel** : les deux vitesses (soufflage et extraction) se règlent à la main ;
   - **Éco**, **Confort**, **Boost** : extraction à pression constante, avec une consigne par mode : **90 Pa** (Éco, nuit), **125 Pa** (Confort, jour), **170 Pa** (Boost). « Consigne dépression extraction » devient « Consigne dépression – Confort ».
-- **Soufflage automatique** : il suit toujours l'extraction, avec l'écart réglable « Soufflage – écart / extraction ». Il n'est plus réglable à la main ; « Vitesse soufflage » devient un capteur en lecture seule (`sensor.vmc_vitesse_soufflage`). Le mode « Équilibrage auto » et son réglage « rapport des débits visé » sont supprimés.
+- **Soufflage automatique** en Éco / Confort / Boost : il suit l'extraction, avec l'écart réglable « Soufflage – écart / extraction ». Le mode « Équilibrage auto » et son réglage « rapport des débits visé » sont supprimés. Bouger un curseur à la main fait passer en Manuel.
 - Nouvelle automatisation [`vmc-mode-nuit.yaml`](homeassistant/automations/vmc-mode-nuit.yaml) : Éco de 22 h à 8 h, Confort le jour, sans toucher à un Boost ou un Manuel choisi à la main. Elle remplace `vmc-soufflage-nuit.yaml` (supprimée).
 - By-pass ouvert : la consigne free-cooling ne s'applique que si elle est plus élevée que celle du mode (un Boost reste un Boost).
-- Cartes Home Assistant : la vitesse de soufflage s'affiche en lecture seule.
+- Carte Home Assistant (tuiles) : sélecteur de mode, et curseurs des deux ventilateurs affichés **seulement en mode Manuel** (carte conditionnelle).
 - **Réglages épurés** : l'antigel (seuil 1 °C, baisse maxi 40 %), la durée des filtres (180 jours) et la réactivité de la régulation (0,05 %/Pa) sont fixés dans le programme (substitutions en haut du YAML) et ne sont plus modifiables depuis Home Assistant. Le bouton « Filtres changés » reste.
 - Supprimés : « By-pass probablement ouvert » (le by-pass est piloté, la carte affiche l'état du relais) et « Économie moyenne par jour ».
 

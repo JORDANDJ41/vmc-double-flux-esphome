@@ -163,29 +163,43 @@ cards:
           confirmation:
             text: Filtres changés ? Le compteur sera remis à zéro.
 
+  # ---------- Mode de ventilation ----------
+  - type: custom:mushroom-select-card
+    entity: select.vmc_mode_de_ventilation
+    name: Mode de ventilation
+    icon: mdi:fan-auto
+
+  # Curseurs des deux ventilateurs : affichés seulement en mode Manuel
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: select.vmc_mode_de_ventilation
+        state: Manuel
+    card:
+      type: grid
+      columns: 2
+      square: false
+      cards:
+        - type: custom:mushroom-number-card
+          entity: number.vmc_vitesse_soufflage
+          name: Vitesse soufflage
+          icon: mdi:fan
+          display_mode: buttons
+        - type: custom:mushroom-number-card
+          entity: number.vmc_vitesse_extraction
+          name: Vitesse extraction
+          icon: mdi:fan
+          display_mode: buttons
+
   # ---------- Réglages ----------
   - type: grid
     columns: 2
     square: false
     cards:
-      - type: custom:mushroom-entity-card
-        entity: sensor.vmc_vitesse_soufflage
-        name: Vitesse soufflage (auto)
-        icon: mdi:fan
-      - type: custom:mushroom-number-card
-        entity: number.vmc_vitesse_extraction
-        name: Vitesse extraction
-        icon: mdi:fan
-        display_mode: buttons
       - type: custom:mushroom-number-card
         entity: number.vmc_debit_estime
         name: Débit estimé
         icon: mdi:weather-windy
-        display_mode: buttons
-      - type: custom:mushroom-number-card
-        entity: number.vmc_filtres_seuil_de_changement
-        name: Seuil filtres (j)
-        icon: mdi:air-filter
         display_mode: buttons
 
   # ---------- Diagnostic ----------
