@@ -99,3 +99,7 @@ elements:
       - type: image
         image: /local/vmc_ha_bypass.svg
         style: {left: 50%, top: 50%, width: 100%}
+
+# Pleine largeur : évite que la ligne « consigne » se superpose à la pression sur une carte étroite
+grid_options:
+  columns: 24

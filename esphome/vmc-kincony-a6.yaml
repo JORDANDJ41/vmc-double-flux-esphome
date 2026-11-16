@@ -72,6 +72,7 @@ api:
 
 ota:
   - platform: esphome
+    encryption:            # chiffrement des mises à jour sans fil (ajouté par ESPHome Builder ; évite la question à chaque installation)
 
 wifi:
   ssid: !secret wifi_ssid

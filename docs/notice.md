@@ -255,6 +255,8 @@ Deux cartes sont fournies. On peut utiliser l'une, l'autre ou les deux.
 3. **Effacer** tout le texte proposé, puis **coller tout le contenu** du fichier `.yaml` de la carte (ouvrir le fichier sur GitHub → bouton « Copy raw file »).
 4. **Enregistrer**, puis **Terminé** en haut à droite.
 
+La carte **Schéma** est prévue en **pleine largeur** (`grid_options: columns: 24` à la fin du fichier) : plus étroite, certains textes se chevauchent.
+
 ### Mettre à jour une carte existante (nouvelle version)
 
 1. **✏️ Modifier le tableau de bord**, survoler la carte, cliquer sur **Modifier**.

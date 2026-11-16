@@ -52,6 +52,7 @@ api:
 
 ota:
   - platform: esphome
+    encryption:            # chiffrement des mises à jour sans fil (ajouté par ESPHome Builder ; évite la question à chaque installation)
 
 wifi:
   ssid: !secret wifi_ssid
@@ -234,7 +235,7 @@ output:
     pin: GPIO26
     inverted: true
 
-# Débit estimé : débit de soufflage à 100 % (utilisé tant qu'aucun point d'étalonnage n'est saisi), à régler depuis HA
+# Débit estimé : débit de soufflage à 100 % (utilisé tant qu'aucun point d'étalonnage n'est saisi), à régler depuis la page web de l'ESP
 number:
   - platform: template
     id: etal_qs25
