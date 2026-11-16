@@ -214,6 +214,7 @@ Durée fixe de **365 jours** (un changement par an, préconisation constructeur 
 | Écart rendements | grand écart = déséquilibre des débits |
 | Rapport débits extraction sur soufflage | 1,0 à 1,1 = idéal ; au-dessus de 1,3 = forte dépression |
 | Pression réseau extraction | dépression du réseau (capteur Huba) |
+| Consigne extraction | consigne de dépression appliquée selon le mode (vide en Manuel) |
 | Air soufflé froid | T insufflation inférieure à 15 °C pendant 10 min |
 | Risque givrage échangeur | T rejet inférieure à 1 °C pendant 5 min |
 

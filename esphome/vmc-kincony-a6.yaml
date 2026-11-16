@@ -1035,6 +1035,28 @@ sensor:
           - throttle: 300s
           - delta: 1
 
+  # Consigne de dépression appliquée (selon le mode) ; vide en Manuel
+  - platform: template
+    id: consigne_active
+    name: "Consigne extraction"
+    web_server:
+      sorting_group_id: grp_perf
+      sorting_weight: 6.1
+    icon: mdi:target
+    unit_of_measurement: "Pa"
+    accuracy_decimals: 0
+    update_interval: 5s
+    lambda: |-
+      auto mv = id(mode_ventil).active_index();
+      int md = mv.has_value() ? (int) *mv : 2;
+      if (md == 0) return NAN;                                // Manuel : pas de consigne
+      float c = md == 1 ? id(consigne_eco).state : (md == 3 ? id(consigne_boost).state : id(consigne_pression).state);
+      if (id(relais_bypass).state && id(fc_consigne).state > c) c = id(fc_consigne).state;   // free-cooling
+      return c + 0.5f * id(antigel_red);
+    filters:
+      - or:
+          - throttle: 300s
+          - delta: 1
   - platform: template
     id: filtre_jours
     name: "Filtres – jours d'utilisation"

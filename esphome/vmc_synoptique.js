@@ -21,6 +21,7 @@
     en: "\u00c9nergie r\u00e9cup\u00e9r\u00e9e",
     ratio: "Rapport d\u00e9bits extraction sur soufflage",
     pres: "Pression r\u00e9seau extraction",
+    cons: "Consigne extraction",
     froid: "Air souffl\u00e9 froid",
     givre: "Risque givrage \u00e9changeur",
     filtre: "Filtres \u00e0 changer",
@@ -233,7 +234,8 @@
     set("v-pw", num("pw") === null ? "-- W" : Math.round(num("pw")) + " W");
     set("v-en", (num("en") === null ? "-- kWh" : (num("en") / 1000).toFixed(2) + " kWh") +
       (num("eco") === null ? "" : " \u00b7 " + num("eco").toFixed(2).replace(".", ",") + " \u20ac"));
-    set("v-pres", num("pres") === null ? "-- Pa" : Math.round(num("pres")) + " Pa");
+    set("v-pres", (num("pres") === null ? "-- Pa" : Math.round(num("pres")) + " Pa")
+      + (num("cons") === null ? "" : " / consigne " + Math.round(num("cons"))));
     const r = num("ratio");
     const dT = (num("trep") !== null && num("text") !== null) ? num("trep") - num("text") : null;
     set("v-ratio", r === null ? (dT !== null && dT < 6 ? "-- (doux)" : "calcul\u2026") :
