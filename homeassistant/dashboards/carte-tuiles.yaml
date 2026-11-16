@@ -168,11 +168,10 @@ cards:
     columns: 2
     square: false
     cards:
-      - type: custom:mushroom-number-card
-        entity: number.vmc_vitesse_soufflage
-        name: Vitesse soufflage
+      - type: custom:mushroom-entity-card
+        entity: sensor.vmc_vitesse_soufflage
+        name: Vitesse soufflage (auto)
         icon: mdi:fan
-        display_mode: buttons
       - type: custom:mushroom-number-card
         entity: number.vmc_vitesse_extraction
         name: Vitesse extraction

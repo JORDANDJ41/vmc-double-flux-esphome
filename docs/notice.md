@@ -133,28 +133,26 @@ Adresse : `http://<IP-de-l-ESP>` ou `http://vmc.local`. Elle fonctionne **sans H
 
 | Réglage | Rôle |
 |---|---|
-| Vitesse soufflage / extraction (10-100 %) | 10 % = 1 V, 100 % = 10 V sur le fil jaune |
+| Vitesse extraction (10-100 %) | 10 % = 1 V, 100 % = 10 V sur le fil jaune. Réglable en mode **Manuel** |
+| Vitesse soufflage | lecture seule : le soufflage suit toujours l'extraction (+ écart réglable) |
 | Coupure moteur soufflage / extraction | coupe le 230 V (relais câblés en NF : au repos, le moteur tourne) |
 
-**Bouger un curseur à la main fait passer sa régulation en Manuel**, et elle y reste.
+**Bouger le curseur d'extraction à la main fait passer le mode de ventilation en Manuel**, et il y reste.
 
 ### 7.3 Régulation automatique
 
 | Réglage | Valeur par défaut | Rôle |
 |---|---|---|
-| Régulation extraction | Pression constante | **Manuel** ou **Pression constante** |
-| Mode de ventilation | Confort | **Éco**, **Confort** ou **Boost** : choisit la consigne de dépression utilisée |
+| Mode de ventilation | Confort | **Manuel** : vitesse d'extraction réglée à la main. **Éco**, **Confort**, **Boost** : extraction à pression constante, avec la consigne du mode |
 | Consigne dépression – Éco (nuit) | 90 Pa | moins de bruit et de consommation la nuit |
 | Consigne dépression – Confort | 125 Pa | régime normal de jour |
 | Consigne dépression – Boost | 170 Pa | coup de ventilation (odeurs, séchage, soirée d'été) |
 | Régulation pression – réactivité | 0,05 %/Pa | à augmenter si la régulation est trop lente, à diminuer si elle oscille |
-| Régulation soufflage | Suivi extraction | **Manuel**, **Suivi extraction** ou **Équilibrage auto** |
-| Soufflage – écart / extraction | −5 % | en Suivi : soufflage = extraction + écart (négatif = légère dépression) |
-| Soufflage – rapport des débits visé | 1,05 | en Équilibrage auto : rapport extraction/soufflage visé |
+| Soufflage – écart / extraction | −5 % | soufflage = extraction + écart, dans tous les modes (négatif = légère dépression, positif = légère surpression) |
 
 - **Modes de ventilation** : les consignes sont mesurées au caisson (capteur de pression). Les gaines font perdre quelques Pa jusqu'aux bouches. Des bouches hygro B fonctionnent entre 80 et 160 Pa : vérifiez au manomètre si possible, la bouche la plus proche en Boost et la plus éloignée en Éco. Le changement de mode se fait à la main ou par un planning Home Assistant (automatisation fournie, voir §8). Si le by-pass est ouvert, la consigne free-cooling s'applique quand elle est plus élevée.
 - **Pression constante** : quand les bouches hygro s'ouvrent, la pression baisse et l'extraction accélère. Zone morte ±3 Pa, variation de 3 % maximum toutes les 5 s.
-- **Équilibrage auto** : correction de ±3 % toutes les 10 min, d'après les températures. C'est volontairement lent, à cause de l'inertie thermique. Inactif par temps doux (écart reprise/extérieur inférieur à 6 °C) et pendant l'antigel.
+- **Soufflage** : il n'est pas réglable directement. Il suit l'extraction avec l'écart réglé, ce qui garde la maison équilibrée quel que soit le mode. Pour corriger un déséquilibre (voir « Rapport débits »), ajustez l'écart.
 
 ### 7.4 Antigel
 
@@ -235,19 +233,18 @@ Les rendements et le rapport des débits ne sont calculés que si l'écart repri
 4. Si vous avez nommé l'appareil autrement que `vmc`, adapter les `entity_id` (`sensor.vmc_…`).
 
 Automatisations fournies :
-- [`vmc-mode-nuit.yaml`](../homeassistant/automations/vmc-mode-nuit.yaml) : mode **Éco** de 22 h à 8 h, **Confort** le jour. À utiliser en régulation automatique (pression constante + suivi extraction).
-- [`vmc-soufflage-nuit.yaml`](../homeassistant/automations/vmc-soufflage-nuit.yaml) : soufflage à 70 % la nuit. **Elle ne sert qu'en mode Manuel.**
+- [`vmc-mode-nuit.yaml`](../homeassistant/automations/vmc-mode-nuit.yaml) : mode **Éco** de 22 h à 8 h, **Confort** le jour. Elle ne touche pas à un mode Boost ou Manuel choisi à la main.
 
 ---
 
 ## 9. Mise en service conseillée
 
 1. Vérifier les sondes, les sorties 0-10 V et la pression (§5).
-2. Commencer en **Manuel**, avec les deux vitesses à environ 70 %, et laisser stabiliser 1 h.
+2. Commencer en mode **Manuel**, extraction à environ 70 % (le soufflage suit), et laisser stabiliser 1 h.
 3. **Mesurer les débits** (fil chaud ou cône) aux 4 vitesses et les saisir (§7.6).
 4. Noter la **pression extraction** au régime nominal, et en faire la **consigne**.
-5. Passer l'extraction en **Pression constante** et le soufflage en **Suivi extraction** (écart −5 %).
-6. Vérifier sur 24 h : rapport des débits entre 1,0 et 1,1, pas d'oscillation de vitesse, rendements proches.
+5. Passer en mode **Confort** (pression constante). Le soufflage suit l'extraction avec l'écart réglé (−5 % par défaut).
+6. Vérifier sur 24 h : rapport des débits entre 1,0 et 1,1 (sinon ajuster l'écart du soufflage), pas d'oscillation de vitesse, rendements proches.
 7. En été : by-pass en **Automatique**.
 
 > 🔥 Avec un appareil à combustion qui prend son air dans la maison (poêle, insert, chaudière), évitez toute forte dépression et installez un **détecteur de CO**.

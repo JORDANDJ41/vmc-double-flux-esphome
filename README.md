@@ -12,8 +12,8 @@ Supervision et pilotage d'une **VMC double flux** (testé sur **Atlantic Duocosy
 - **Débits réels en m³/h** après saisie de mesures d'étalonnage (fil chaud), utilisés pour la puissance et l'énergie récupérées.
 - **Pression du réseau d'extraction**, mesurée par le capteur Huba d'origine (0,5-4,5 V = 0-300 Pa).
 - **Commande des 2 moteurs EC en 0-10 V**, de 10 à 100 %.
-- **Modes Éco / Confort / Boost** : une consigne de dépression par mode, basculée à la main ou par un planning Home Assistant (Éco la nuit : moins de bruit, sans déséquilibre).
-- **Régulation automatique** : extraction **à pression constante** (consigne en Pa, comme la régulation hygro d'origine : quand les bouches s'ouvrent, l'extraction accélère), et soufflage en **suivi de l'extraction** (avec un écart réglable) ou en **équilibrage automatique** sur le rapport des débits.
+- **Modes Manuel / Éco / Confort / Boost** : en Éco, Confort et Boost, l'extraction est **à pression constante** (une consigne en Pa par mode, comme la régulation hygro d'origine : quand les bouches s'ouvrent, l'extraction accélère) ; en Manuel, la vitesse d'extraction se règle à la main. Bascule à la main ou par un planning Home Assistant (Éco la nuit : moins de bruit).
+- **Soufflage automatique** : il suit toujours l'extraction, avec un écart réglable en %, pour garder la maison équilibrée. Il n'est pas réglable directement.
 - **Antigel progressif** : si T rejet passe sous le seuil (1 °C par défaut), le soufflage baisse de 5 %/min (jusqu'à une baisse maximale réglable) et l'extraction augmente, sans jamais couper le soufflage.
 - **Alertes** : risque de givre de l'échangeur, air soufflé froid, by-pass ouvert, filtres à changer (compteur de jours avec remise à zéro).
 - **By-pass / free-cooling** automatique (version KinCony) : principe 24 °C / 12 °C, avec seuils réglables, modes forcés et **consigne de pression d'été** dédiée (plus de débit pendant le free-cooling).
@@ -45,7 +45,7 @@ Supervision et pilotage d'une **VMC double flux** (testé sur **Atlantic Duocosy
 4. Home Assistant :
    - copier `homeassistant/www/*.svg` dans `/config/www/` ;
    - coller `homeassistant/dashboards/carte-schema.yaml` et/ou `carte-tuiles.yaml` dans une carte en mode manuel ;
-   - l'automatisation `homeassistant/automations/vmc-soufflage-nuit.yaml` est optionnelle (70 % de 22 h à 6 h).
+   - l'automatisation `homeassistant/automations/vmc-mode-nuit.yaml` est optionnelle (mode Éco de 22 h à 8 h).
 5. Ouvrir `http://<IP-de-l-ESP>` : schéma en direct, bouton **⚙ Configurer** (code `admin` par défaut, modifiable en haut du `.js`).
 
 Détails : [`docs/cablage-kincony-a6.md`](docs/cablage-kincony-a6.md), [`docs/cablage-esp32-devkit.md`](docs/cablage-esp32-devkit.md), [`docs/etalonnage-et-mesures.md`](docs/etalonnage-et-mesures.md).

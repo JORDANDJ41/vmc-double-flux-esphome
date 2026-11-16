@@ -1,10 +1,14 @@
 # Historique des versions
 
-## Prochaine version (v1.5.0, non testée) : modes Éco / Confort / Boost
+## Prochaine version (v1.5.0, non testée) : modes Manuel / Éco / Confort / Boost
 
-- Nouveau sélecteur **« Mode de ventilation »** : **Éco**, **Confort** ou **Boost**. Chaque mode a sa propre consigne de dépression : **90 Pa** (Éco, nuit), **125 Pa** (Confort, jour) et **170 Pa** (Boost). « Consigne dépression extraction » devient « Consigne dépression – Confort » (même entité).
-- Nouvelle automatisation Home Assistant [`vmc-mode-nuit.yaml`](homeassistant/automations/vmc-mode-nuit.yaml) : Éco de 22 h à 8 h, Confort le jour, sans écraser un Boost en cours. Moins de bruit la nuit, sans déséquilibrer soufflage et extraction.
-- By-pass ouvert : la consigne free-cooling ne s'applique plus que si elle est plus élevée que celle du mode (un Boost reste un Boost).
+- Un seul sélecteur **« Mode de ventilation »** remplace « Régulation extraction » et « Régulation soufflage » :
+  - **Manuel** : la vitesse d'extraction se règle à la main ;
+  - **Éco**, **Confort**, **Boost** : extraction à pression constante, avec une consigne par mode : **90 Pa** (Éco, nuit), **125 Pa** (Confort, jour), **170 Pa** (Boost). « Consigne dépression extraction » devient « Consigne dépression – Confort ».
+- **Soufflage automatique** : il suit toujours l'extraction, avec l'écart réglable « Soufflage – écart / extraction ». Il n'est plus réglable à la main ; « Vitesse soufflage » devient un capteur en lecture seule (`sensor.vmc_vitesse_soufflage`). Le mode « Équilibrage auto » et son réglage « rapport des débits visé » sont supprimés.
+- Nouvelle automatisation [`vmc-mode-nuit.yaml`](homeassistant/automations/vmc-mode-nuit.yaml) : Éco de 22 h à 8 h, Confort le jour, sans toucher à un Boost ou un Manuel choisi à la main. Elle remplace `vmc-soufflage-nuit.yaml` (supprimée).
+- By-pass ouvert : la consigne free-cooling ne s'applique que si elle est plus élevée que celle du mode (un Boost reste un Boost).
+- Cartes Home Assistant : la vitesse de soufflage s'affiche en lecture seule.
 
 ## v1.4.1 (16/11/2026) : correction
 
