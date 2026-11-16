@@ -15,7 +15,7 @@ Supervision et pilotage d'une **VMC double flux** (testé sur **Atlantic Duocosy
 - **Modes Manuel / Éco / Confort / Boost** : en Éco, Confort et Boost, l'extraction est **à pression constante** (une consigne en Pa par mode, comme la régulation hygro d'origine : quand les bouches s'ouvrent, l'extraction accélère) ; en Manuel, les deux vitesses se règlent à la main (curseurs affichés seulement en Manuel sur la carte HA). Bascule à la main ou par un planning Home Assistant (Éco la nuit : moins de bruit).
 - **Soufflage automatique** en Éco / Confort / Boost : il suit l'extraction, avec un écart réglable en %, pour garder la maison équilibrée.
 - **Antigel progressif** : si T rejet passe sous 1 °C, le soufflage baisse de 5 %/min (jusqu'à 40 % de baisse au maximum) et l'extraction augmente, sans jamais couper le soufflage.
-- **Alertes** : risque de givre de l'échangeur, air soufflé froid, filtres à changer (180 jours, compteur avec remise à zéro).
+- **Alertes** : risque de givre de l'échangeur, air soufflé froid, filtres à changer (1 fois par an, compteur avec remise à zéro).
 - **By-pass / free-cooling** automatique (version KinCony) : principe 24 °C / 12 °C, avec seuils réglables, modes forcés et **consigne de pression d'été** dédiée (plus de débit pendant le free-cooling).
 - **Relais de coupure** des moteurs, câblés sur le contact NF pour la sécurité (version KinCony).
 - **Page web autonome** dans l'ESP : un schéma animé de la VMC, et une page de configuration protégée par code.

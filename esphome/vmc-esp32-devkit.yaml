@@ -15,7 +15,7 @@ substitutions:
   # Réglages fixes (non modifiables depuis Home Assistant)
   antigel_seuil: "1.0"     # antigel : T rejet mini (°C)
   antigel_max: "40.0"      # antigel : baisse maxi du soufflage (%)
-  filtre_seuil: "180"      # filtres : durée avant changement (jours)
+  filtre_seuil: "365"      # filtres : durée avant changement (jours) — 1 fois par an (préconisation constructeur)
   pi_gain: "0.05"          # régulation pression : réactivité (%/Pa)
   delta_min: "6.0"        # écart T_rep - T_ext mini pour un rendement exploitable (°C)
   # Étage moteur : résistance WAGO rouge->jaune (côté moteur) et résistance d'émetteur (platine)
@@ -552,7 +552,7 @@ select:
       sorting_weight: 1
     icon: mdi:fan-auto
     options: ["Manuel", "Éco", "Confort", "Boost"]
-    initial_option: "Confort"
+    initial_option: "Manuel"     # démarrage en Manuel : on passe en Éco/Confort/Boost une fois la mise en service faite
     restore_value: true
     optimistic: true
 

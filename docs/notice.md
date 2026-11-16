@@ -204,7 +204,7 @@ Valeur par défaut : 0,21 €/kWh, une moyenne pour le tarif Base en 2026. Le pr
 | Filtres – jours d'utilisation | compteur |
 | Filtres changés (remise à zéro) | à presser après le remplacement |
 
-Durée fixe de **180 jours** avant l'alerte « Filtres à changer » (réglage `filtre_seuil` en haut du YAML).
+Durée fixe de **365 jours** (un changement par an, préconisation constructeur pour une VMC double flux d'habitation) avant l'alerte « Filtres à changer » (réglage `filtre_seuil` en haut du YAML).
 
 ### 7.8 Indicateurs
 
