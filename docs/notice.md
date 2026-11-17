@@ -356,7 +356,7 @@ Le plus simple est **ESPHome Device Builder**, le même outil que dans Home Assi
 
 ### Étape 4 : connexion au Wi-Fi et page web
 
-1. Au démarrage, l'ESP se connecte au Wi-Fi des secrets. S'il n'y arrive pas, il crée le réseau **« VMC Fallback Hotspot »** : s'y connecter avec le téléphone (mot de passe `ap_password`) et choisir le bon Wi-Fi dans la page qui s'ouvre.
+1. Au démarrage, l'ESP se connecte au Wi-Fi des secrets. S'il n'y arrive pas, il crée le réseau **« VMC double flux »** : voir [Changer de Wi-Fi](#changer-de-wi-fi-wi-fi-de-secours) ci-dessous.
 2. Ouvrir **http://vmc.local** (ou l'adresse IP de l'ESP, visible dans la box Internet).
 3. Tout se pilote depuis cette page : boutons de mode (Manuel, Éco, Confort, Boost), et ⚙ Configurer pour les vitesses, les consignes, les sondes et l'étalonnage.
 
@@ -378,3 +378,14 @@ Le plus simple est **ESPHome Device Builder**, le même outil que dans Home Assi
 1. Relancer le Builder sur le PC (`esphome dashboard C:\esphome`).
 2. Remplacer `vmc_synoptique.js` et le `.yaml` par la nouvelle version, en gardant vos secrets.
 3. **Install → Wirelessly** : la mise à jour passe par le Wi-Fi, sans câble. Les réglages sont conservés.
+
+### Changer de Wi-Fi (Wi-Fi de secours)
+
+Valable avec ou sans Home Assistant : changement de box, nouveau mot de passe Wi-Fi, déménagement…
+
+1. Si l'ESP ne parvient pas à joindre son Wi-Fi pendant **1 minute**, il crée son propre réseau : **« VMC double flux »**. La perte d'Internet seule ne le déclenche pas : il faut que le Wi-Fi lui-même soit injoignable.
+2. Avec un téléphone, se connecter à ce réseau. Mot de passe : celui de `ap_password` dans les secrets (`vmcdoubleflux` dans l'exemple ; pensez à le personnaliser).
+3. Une page s'ouvre toute seule (sinon, ouvrir **http://192.168.4.1**) : choisir le nouveau Wi-Fi, taper son mot de passe, **Enregistrer**.
+4. L'ESP redémarre et rejoint le nouveau Wi-Fi. La VMC continue de tourner pendant toute l'opération.
+
+> Le Wi-Fi choisi ici remplace celui des secrets jusqu'au prochain flash. Pensez à mettre aussi à jour `wifi_ssid` et `wifi_password` dans les secrets, pour que la prochaine mise à jour le garde.
