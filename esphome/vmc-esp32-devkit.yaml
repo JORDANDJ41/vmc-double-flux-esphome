@@ -62,7 +62,7 @@ wifi:
     # Wi-Fi de secours : créé si l'ESP n'arrive pas à joindre le Wi-Fi pendant 1 min.
     # S'y connecter avec un téléphone : une page s'ouvre pour choisir un nouveau Wi-Fi.
     ssid: "VMC double flux"
-    password: !secret ap_password
+    password: "vmcdoubleflux"   # mot de passe par défaut, identique pour tous (modifiable ici)
 
 captive_portal:
 

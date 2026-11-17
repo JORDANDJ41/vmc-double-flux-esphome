@@ -52,7 +52,6 @@ Voir [`cablage-esp32-devkit.md`](cablage-esp32-devkit.md). Elle fonctionne, mais
    wifi_ssid: "MonReseau"
    wifi_password: "MonMotDePasseWifi"
    vmc_api_key: "..."      # généré par le Builder à la création de l'appareil
-   ap_password: "..."      # mot de passe du point d'accès de secours
    ```
 4. Pour les cartes Home Assistant : installer **Mushroom** via HACS (uniquement pour la carte en tuiles).
 
@@ -344,7 +343,7 @@ Le plus simple est **ESPHome Device Builder**, le même outil que dans Home Assi
 ### Étape 2 : préparer les fichiers
 
 1. Dans le dossier `esphome`, copier `vmc_synoptique.js` et le `.yaml` de votre carte (le renommer `vmc.yaml`).
-2. Dans le Builder, bouton **Secrets** : remplir le Wi-Fi, un mot de passe pour le point d'accès de secours, et une clé `vmc_api_key` (le Builder en génère une à la création d'un appareil ; sans Home Assistant, n'importe quelle clé valide convient).
+2. Dans le Builder, bouton **Secrets** : remplir le Wi-Fi et une clé `vmc_api_key` (le Builder en génère une à la création d'un appareil ; sans Home Assistant, n'importe quelle clé valide convient).
 3. **Validate** sur l'appareil : « Configuration is valid! ».
 
 ### Étape 3 : premier flash (USB)
@@ -384,7 +383,7 @@ Le plus simple est **ESPHome Device Builder**, le même outil que dans Home Assi
 Valable avec ou sans Home Assistant : changement de box, nouveau mot de passe Wi-Fi, déménagement…
 
 1. Si l'ESP ne parvient pas à joindre son Wi-Fi pendant **1 minute**, il crée son propre réseau : **« VMC double flux »**. La perte d'Internet seule ne le déclenche pas : il faut que le Wi-Fi lui-même soit injoignable.
-2. Avec un téléphone, se connecter à ce réseau. Mot de passe : celui de `ap_password` dans les secrets (`vmcdoubleflux` dans l'exemple ; pensez à le personnaliser).
+2. Avec un téléphone, se connecter à ce réseau. Mot de passe : **`vmcdoubleflux`** (par défaut, modifiable dans le `.yaml`, bloc `ap:`).
 3. Une page s'ouvre toute seule (sinon, ouvrir **http://192.168.4.1**) : choisir le nouveau Wi-Fi, taper son mot de passe, **Enregistrer**.
 4. L'ESP redémarre et rejoint le nouveau Wi-Fi. La VMC continue de tourner pendant toute l'opération.
 
