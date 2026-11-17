@@ -2,7 +2,7 @@
 
 Supervision et pilotage d'une **VMC double flux** (testé sur **Atlantic Duocosy HR HY**, moteurs ebm-papst R3G140 EC 0-10 V) avec **ESPHome** et **Home Assistant**, en remplacement de la régulation d'origine.
 
-![Page web intégrée à l'ESP](docs/images/page-web-esp.png)
+![Page web intégrée à l'ESP](docs/images/page-web-esp-v1.5.png)
 
 *Page web de l'ESP en mode Confort (valeurs d'exemple d'une VMC réglée).*
 
@@ -23,7 +23,7 @@ Supervision et pilotage d'une **VMC double flux** (testé sur **Atlantic Duocosy
 - **Page web autonome** dans l'ESP : un schéma animé de la VMC, et une page de configuration protégée par code.
 - **Cartes Home Assistant** : un schéma « picture-elements » et des tuiles Mushroom.
 
-![Carte Home Assistant](docs/images/carte-home-assistant.png)
+![Carte Home Assistant](docs/images/carte-home-assistant-v1.5.png)
 
 *Carte Home Assistant (valeurs d'exemple).*
 
