@@ -19,6 +19,7 @@ Cette notice accompagne les configurations ESPHome du dépôt. Elle s'adresse à
 9. [Mise en service conseillée](#9-mise-en-service-conseillée)
 10. [Dépannage](#10-dépannage)
 11. [Mettre à jour](#11-mettre-à-jour)
+12. [Utiliser la VMC sans Home Assistant](#12-utiliser-la-vmc-sans-home-assistant)
 
 ---
 
@@ -311,3 +312,69 @@ Automatisations fournies :
 3. Coller le nouveau `.yaml` **en gardant votre bloc `api: encryption: key:`** et vos secrets.
 4. **Validate**, puis **Install** (sans fil).
 5. Les réglages (consignes, affectations, étalonnage, compteur de filtres) sont **conservés** : ils sont stockés dans l'ESP.
+
+---
+
+## 12. Utiliser la VMC sans Home Assistant
+
+L'ESP fonctionne **seul** : la régulation, l'antigel, les alertes et la page web tournent dans la carte. Home Assistant ne sert qu'aux historiques, aux automatisations (Éco la nuit) et aux tableaux de bord. On peut donc s'en passer, il faut juste un ordinateur pour la première installation.
+
+### Ce qu'il faut
+
+- Un ordinateur (Windows, Mac ou Linux) avec le navigateur **Chrome** ou **Edge**, et un câble USB pour la carte.
+- Les fichiers du dépôt : le `.yaml` de votre carte (KinCony ou DevKit), [`vmc_synoptique.js`](../esphome/vmc_synoptique.js) et [`secrets.example.yaml`](../esphome/secrets.example.yaml).
+
+### Étape 1 : installer ESPHome sur l'ordinateur
+
+Le plus simple est **ESPHome Device Builder**, le même outil que dans Home Assistant, mais sur le PC :
+
+1. Installer **Python 3** (python.org ; sous Windows, cocher « Add Python to PATH »).
+2. Ouvrir un terminal (Windows : touche Windows, taper `cmd`) et taper :
+   ```
+   pip install esphome
+   ```
+3. Créer un dossier, par exemple `C:\esphome` (ou `~/esphome`), puis lancer :
+   ```
+   esphome dashboard C:\esphome
+   ```
+4. Ouvrir **http://localhost:6052** dans le navigateur : c'est l'ESPHome Device Builder.
+
+> Avec Docker : `docker run --rm -p 6052:6052 -v "${PWD}":/config ghcr.io/esphome/esphome` donne le même résultat.
+
+### Étape 2 : préparer les fichiers
+
+1. Dans le dossier `esphome`, copier `vmc_synoptique.js` et le `.yaml` de votre carte (le renommer `vmc.yaml`).
+2. Dans le Builder, bouton **Secrets** : remplir le Wi-Fi, un mot de passe pour le point d'accès de secours, et une clé `vmc_api_key` (le Builder en génère une à la création d'un appareil ; sans Home Assistant, n'importe quelle clé valide convient).
+3. **Validate** sur l'appareil : « Configuration is valid! ».
+
+### Étape 3 : premier flash (USB)
+
+1. Brancher la carte en USB sur l'ordinateur.
+2. **Install → Plug into this computer** et choisir le port de la carte.
+   - Si le port n'apparaît pas : installer le pilote USB de la carte (CH340 ou CP210x selon le modèle).
+   - Autre solution : **Install → Manual download**, puis flasher le fichier `.bin` avec **https://web.esphome.io** (Chrome ou Edge).
+
+### Étape 4 : connexion au Wi-Fi et page web
+
+1. Au démarrage, l'ESP se connecte au Wi-Fi des secrets. S'il n'y arrive pas, il crée le réseau **« VMC Fallback Hotspot »** : s'y connecter avec le téléphone (mot de passe `ap_password`) et choisir le bon Wi-Fi dans la page qui s'ouvre.
+2. Ouvrir **http://vmc.local** (ou l'adresse IP de l'ESP, visible dans la box Internet).
+3. Tout se pilote depuis cette page : boutons de mode (Manuel, Éco, Confort, Boost), et ⚙ Configurer pour les vitesses, les consignes, les sondes et l'étalonnage.
+
+### Ce qui change sans Home Assistant
+
+| Fonction | Sans Home Assistant |
+|---|---|
+| Régulation, antigel, alertes, compteur de filtres | identique (tout tourne dans l'ESP) |
+| Page web avec le schéma | identique |
+| Heure (dates des remises à zéro) | prise sur Internet (SNTP). Sans Internet, les dates restent « non daté » |
+| Page ⚙ Configurer | son interface se charge depuis Internet ; sans Internet, seul le schéma s'affiche |
+| Mode Éco automatique la nuit | pas de planning : changer le mode à la main sur la page web |
+| Historiques et graphiques | non disponibles |
+
+> Le programme contient `reboot_timeout: 0s` dans `api:` : sans ce réglage, ESPHome redémarre l'ESP toutes les 15 minutes quand aucun Home Assistant ne s'y connecte.
+
+### Mettre à jour sans Home Assistant
+
+1. Relancer le Builder sur le PC (`esphome dashboard C:\esphome`).
+2. Remplacer `vmc_synoptique.js` et le `.yaml` par la nouvelle version, en gardant vos secrets.
+3. **Install → Wirelessly** : la mise à jour passe par le Wi-Fi, sans câble. Les réglages sont conservés.

@@ -2,6 +2,8 @@
 
 ## Prochaine version
 
+- `api:` : `reboot_timeout: 0s`, pour que l'ESP ne redémarre pas toutes les 15 minutes quand il est utilisé **sans Home Assistant**.
+- Notice : nouvelle section **« Utiliser la VMC sans Home Assistant »** (installation depuis un PC, premier flash USB, Wi-Fi, page web, mises à jour).
 - Page web de l'ESP : la consigne s'affiche sur une ligne à part, sous la pression (elle débordait sur les écrans étroits).
 
 ## v1.5.0 (17/11/2026) : modes Manuel / Éco / Confort / Boost

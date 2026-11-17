@@ -67,6 +67,7 @@ esp32:
 logger:
 
 api:
+  reboot_timeout: 0s       # ne pas redémarrer l'ESP s'il n'y a pas de Home Assistant (utilisation autonome)
   encryption:
     key: !secret vmc_api_key
 

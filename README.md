@@ -52,6 +52,8 @@ Supervision et pilotage d'une **VMC double flux** (testé sur **Atlantic Duocosy
    - l'automatisation `homeassistant/automations/vmc-mode-nuit.yaml` est optionnelle (mode Éco de 22 h à 8 h).
 5. Ouvrir `http://<IP-de-l-ESP>` : schéma en direct, bouton **⚙ Configurer** (code `admin` par défaut, modifiable en haut du `.js`).
 
+**Sans Home Assistant ?** L'ESP fonctionne seul (régulation, alertes, page web). Installation depuis un PC : voir [Utiliser la VMC sans Home Assistant](docs/notice.md#12-utiliser-la-vmc-sans-home-assistant).
+
 Détails : [`docs/cablage-kincony-a6.md`](docs/cablage-kincony-a6.md), [`docs/cablage-esp32-devkit.md`](docs/cablage-esp32-devkit.md), [`docs/etalonnage-et-mesures.md`](docs/etalonnage-et-mesures.md).
 
 ## ⚠️ Avertissements
